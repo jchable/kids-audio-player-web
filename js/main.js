@@ -1,10 +1,14 @@
 /* Assemble les données, le moteur audio et les écrans. */
 import { createAudioEngine } from './audio-engine.js';
-import { chapterIndex, findBook, parseCatalogue } from './catalog.js';
+import {
+  chapterIndex, findBook, mergeDownloaded, parseCatalogue,
+} from './catalog.js';
 import { installImageFallback } from './dom.js';
+import { createOffline } from './offline.js';
 import { next as nextCommand, restoreAtStartup, tapChapter } from './playback.js';
 import { guardPlayerRoute, parseRoute, routeHash } from './router.js';
 import { createStore } from './store.js';
+import { renderDownloadButton } from './views/download-button.js';
 import {
   clearNowPlaying, renderNowPlaying, updateNowPlaying,
 } from './views/now-playing.js';
@@ -16,17 +20,28 @@ const root = document.getElementById('app');
 const nowPlayingRoot = document.getElementById('now-playing');
 installImageFallback(document);
 
+let serverCatalogue = null;
 let catalogue = null;
+let serverUp = true;
 let lastActiveKey = null;
 let shownNowPlayingKey = null;
+const seenBooks = new Map(); // un livre en écoute reste connu même s'il disparaît du catalogue
+const progress = new Map();
 
 const store = createStore(localStorage);
 const audio = new Audio();
 audio.preload = 'metadata';
 
-const getBook = (bookId) => findBook(catalogue, bookId);
-const isChapterAvailable = () => true;
-const isBookAvailable = () => true;
+const offline = createOffline({
+  caches: window.caches,
+  fetch: (url, init) => fetch(url, init),
+  persist: () => navigator.storage?.persist?.(),
+});
+
+const getBook = (bookId) => seenBooks.get(bookId) || null;
+const isDownloaded = (bookId) => ['downloaded', 'update'].includes(offline.status(bookId));
+const isChapterAvailable = (book, chapterId) => offline.isChapterAvailable(book, chapterId, serverUp);
+const isBookAvailable = (book) => serverUp || isDownloaded(book.id);
 
 const engine = createAudioEngine({
   audio,
@@ -42,6 +57,12 @@ const go = (route) => { location.hash = routeHash(route); };
 const replaceRoute = (route) => location.replace(routeHash(route));
 const currentRoute = () => parseRoute(location.hash);
 const keyOf = (active) => (active ? `${active.bookId}/${active.chapterId}` : null);
+
+function setCatalogue(fromServer) {
+  serverCatalogue = fromServer;
+  catalogue = mergeDownloaded(serverCatalogue, offline.snapshots());
+  catalogue.books.forEach((book) => seenBooks.set(book.id, book));
+}
 
 function playerRouteFor(active) {
   const book = getBook(active.bookId);
@@ -77,7 +98,52 @@ function showShelf() {
   });
 }
 
-function showPath(book, scrollToCurrent = true) {
+function mountDownload(book) {
+  const slot = root.querySelector('.path-action');
+  if (!slot || !offline.supported) return;
+  renderDownloadButton(slot, {
+    status: offline.status(book.id),
+    progress: progress.get(book.id) || 0,
+    onDownload: () => startDownload(book.id),
+    onRemove: () => removeDownload(book.id),
+  });
+}
+
+function refreshDownloadButton(bookId) {
+  const route = currentRoute();
+  if (route.name === 'path' && route.bookId === bookId) mountDownload(getBook(bookId));
+}
+
+async function startDownload(bookId) {
+  const book = (serverCatalogue && findBook(serverCatalogue, bookId)) || getBook(bookId);
+  progress.set(bookId, 0);
+  const running = offline.download(book, (done, total) => {
+    progress.set(bookId, done / total);
+    refreshDownloadButton(bookId);
+  });
+  refreshDownloadButton(bookId);
+  await running;
+  progress.delete(bookId);
+  setCatalogue(serverCatalogue);
+  render(false);
+}
+
+async function removeDownload(bookId) {
+  await offline.remove(bookId);
+  setCatalogue(serverCatalogue);
+  render(false);
+}
+
+async function refreshServer() {
+  const up = await offline.pingServer();
+  if (up !== serverUp) {
+    serverUp = up;
+    if (catalogue && currentRoute().name !== 'player') render(false);
+  }
+  return up;
+}
+
+function showPath(book, scrollToCurrent) {
   renderPath(root, {
     book,
     saved: store.getPosition(book.id),
@@ -89,10 +155,17 @@ function showPath(book, scrollToCurrent = true) {
       const command = tapChapter({
         book, active: engine.getState().active, saved: store.getPosition(book.id),
       }, chapterId);
+      // Lancé tout de suite : iOS exige que la lecture parte du geste de l'enfant.
       engine.apply(command);
       go(playerRouteFor(command));
+      if (!isDownloaded(book.id)) {
+        refreshServer().then((up) => {
+          if (!up && keyOf(engine.getState().active) === keyOf(command)) engine.markUnavailable();
+        });
+      }
     },
   });
+  mountDownload(book);
 }
 
 function showPlayer(book, route) {
@@ -112,17 +185,17 @@ function showPlayer(book, route) {
   });
 }
 
-function render() {
+function render(scrollToCurrent = true) {
   if (!catalogue) return;
   const requested = currentRoute();
-  const book = requested.name === 'shelf' ? null : getBook(requested.bookId);
+  const book = requested.name === 'shelf' ? null : findBook(catalogue, requested.bookId);
   const route = guardPlayerRoute(requested, engine.getState().active, book);
   if (route !== requested) {
     replaceRoute(route);
     return;
   }
   if (route.name === 'shelf') showShelf();
-  else if (route.name === 'path') showPath(book);
+  else if (route.name === 'path') showPath(book, scrollToCurrent);
   else showPlayer(book, route);
   syncNowPlaying(route);
 }
@@ -152,44 +225,55 @@ function onEngineChange() {
 
 engine.subscribe(onEngineChange);
 engine.onFinished((bookId) => {
-  const route = currentRoute();
-  if (route.name === 'player') replaceRoute({ name: 'path', bookId });
+  if (currentRoute().name === 'player') replaceRoute({ name: 'path', bookId });
 });
 
 let lastWidth = innerWidth;
 addEventListener('resize', () => {
   if (innerWidth === lastWidth) return;
   lastWidth = innerWidth;
-  const route = currentRoute();
-  if (route.name === 'path' && catalogue && getBook(route.bookId)) showPath(getBook(route.bookId), false);
+  if (currentRoute().name === 'path') render(false);
 });
 
-addEventListener('hashchange', render);
+addEventListener('hashchange', () => render());
+addEventListener('online', refreshServer);
+addEventListener('offline', refreshServer);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refreshServer();
+});
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
   navigator.serviceWorker.addEventListener('message', async (event) => {
     if (event.data?.type !== 'catalogue-updated') return;
     const updated = parseCatalogue(await (await fetch('catalogue.json')).text());
-    const { active } = engine.getState();
-    if (!updated || (active && !findBook(updated, active.bookId))) return;
-    catalogue = updated;
-    if (currentRoute().name === 'shelf') render();
+    if (!updated) return;
+    await offline.reconcile(updated);
+    setCatalogue(updated);
+    if (currentRoute().name !== 'player') render(false);
   });
 }
 
-async function start() {
-  const response = await fetch('catalogue.json');
-  catalogue = parseCatalogue(await response.text());
-  const lastBookId = store.getLast();
-  const lastBook = lastBookId ? getBook(lastBookId) : null;
+async function restoreLastListening() {
+  if (engine.getState().active) return;
+  const lastBook = getBook(store.getLast());
   const restored = restoreAtStartup(
     lastBook,
     lastBook ? store.getPosition(lastBook.id) : null,
     (chapterId) => isChapterAvailable(lastBook, chapterId),
   );
   if (restored) engine.restore(restored);
+}
+
+async function start() {
+  const response = await fetch('catalogue.json');
+  const loaded = parseCatalogue(await response.text());
+  await offline.reconcile(loaded);
+  setCatalogue(loaded);
   render();
+  await refreshServer();
+  await restoreLastListening();
+  render(false);
 }
 
 start();

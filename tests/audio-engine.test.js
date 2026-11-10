@@ -320,6 +320,14 @@ test('Media Session : previoustrack et nexttrack suivent les règles', () => {
   assert.equal(mediaSession.handlers.seekbackward, null);
 });
 
+test('markUnavailable arrête la lecture et signale l\'indisponibilité', () => {
+  const { audio, engine } = setup();
+  engine.apply(play('c1'));
+  engine.markUnavailable();
+  assert.equal(audio.paused, true);
+  assert.equal(engine.getState().error, 'unavailable');
+});
+
 test('fonctionne sans Media Session', () => {
   const audio = new FakeAudio();
   const engine = createAudioEngine({

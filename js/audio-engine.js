@@ -171,6 +171,10 @@ export function createAudioEngine({
       if (audio.paused) startPlaying(); else audio.pause();
       notify();
     },
+    markUnavailable() {
+      audio.pause();
+      fail('unavailable');
+    },
     seek(seconds) {
       audio.currentTime = seconds;
       notify();

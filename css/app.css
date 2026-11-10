@@ -337,3 +337,36 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 .now-book { font-size: 14px; opacity: .65; }
 
 .now-toggle { background: var(--orange); color: var(--white); }
+
+/* ----- Téléchargement ----- */
+.download { background: var(--white); color: var(--grass-ink); }
+
+.download[data-status='downloaded'] { background: #3FA24A; color: var(--white); }
+
+.download[data-status='failed'], .download[data-status='update'] { background: #FFB400; color: var(--ink); }
+
+.downloading {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(#3FA24A var(--progress), var(--white) 0);
+}
+
+.downloading span { width: 48px; height: 48px; border-radius: 50%; background: var(--grass); }
+
+.confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(30, 20, 10, .55);
+}
+
+.confirm-box { display: flex; gap: 40px; padding: 32px; border-radius: 32px; background: var(--white); }
+
+.confirm-back { background: var(--grass); color: var(--grass-ink); width: 96px; height: 96px; }
+
+.confirm-delete { background: #E8483F; color: var(--white); width: 96px; height: 96px; }
