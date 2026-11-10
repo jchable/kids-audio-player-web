@@ -1,0 +1,10 @@
+{
+  "name": "kids-audio-player-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "catalogue": "node scripts/generer-catalogue.js",
+    "exemple": "node scripts/creer-exemple.js"
+  }
+}
