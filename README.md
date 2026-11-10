@@ -58,7 +58,7 @@ Le contenu de `bibliotheque/` et `catalogue.json` ne sont pas versionnés dans G
 
 ## Hébergement
 
-Copiez sur le serveur `index.html`, `manifest.webmanifest`, `sw.js`, `catalogue.json` et les dossiers `css/`, `js/`, `fonts/`, `icons/`, `img/`, `bibliotheque/`.
+Copiez sur le serveur `index.html`, `manifest.webmanifest`, `sw.js`, `catalogue.json` et les dossiers `css/`, `js/`, `fonts/`, `icons/`, `img/`, `bibliotheque/`. Ne servez pas la racine du dépôt : `.git/`, `scripts/`, `tests/` et `docs/` seraient lisibles.
 
 Après toute modification de l'application (pas des livres), incrémentez `SHELL_CACHE` dans `sw.js`, sinon les appareils garderont l'ancienne version.
 
@@ -66,7 +66,19 @@ Le site est prévu pour un serveur privé, joignable uniquement depuis le résea
 
 - servir les fichiers en **HTTPS**, sans quoi le mode hors-ligne ne fonctionne pas dans les navigateurs ;
 - utiliser un nom de domaine dont un sous-domaine pointe vers l'adresse locale du serveur, avec un certificat obtenu par challenge DNS ;
-- accepter les requêtes HTTP `Range`, pour pouvoir avancer dans l'audio.
+- accepter les requêtes HTTP `Range`, pour pouvoir avancer dans l'audio ;
+- ne pas être exposé sur Internet : aucune redirection de port vers lui sur la box ;
+- envoyer ces en-têtes sur toutes les réponses :
+
+  ```text
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'self'; connect-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  ```
+
+- et, pour les fichiers `.svg` de `bibliotheque/`, remplacer la politique ci-dessus par `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox`.
+
+`index.html` déclare déjà la même politique, sauf `frame-ancestors`, que seul un en-tête peut imposer. Le service worker protège aussi les SVG de la bibliothèque, mais seulement une fois installé : l'en-tête du serveur couvre la première visite.
 
 Certaines box bloquent les réponses DNS publiques contenant une adresse privée. Il faut alors y ajouter une exception ou une résolution locale.
 

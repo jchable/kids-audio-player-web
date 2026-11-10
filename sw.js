@@ -1,11 +1,11 @@
 /* Service worker : application disponible hors-ligne, audio servi depuis les téléchargements. */
 importScripts('js/sw-lib.js');
 
-const SHELL_CACHE = 'lecteur-shell-v3';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
+const SHELL_CACHE = 'lecteur-shell-v4';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
 const AUDIO_CACHE = 'lecteur-audio-v1';  // Ne jamais renommer : contient les téléchargements
 
 const {
-  parseRange, isAudioPath, isValidCatalogueText, precache, carryOver,
+  parseRange, isAudioPath, isValidCatalogueText, precache, carryOver, withSvgPolicy, isShellAsset,
 } = self.SwLib;
 
 const SHELL_ASSETS = [
@@ -128,8 +128,12 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (isAudioPath(url.pathname)) event.respondWith(serveAudio(request));
-  else if (url.pathname.includes('/bibliotheque/')) event.respondWith(serveImage(request));
-  else if (url.pathname.endsWith('/catalogue.json')) event.respondWith(serveCatalogue(event));
+  else if (url.pathname.includes('/bibliotheque/')) {
+    event.respondWith(serveImage(request).then((response) => withSvgPolicy(response, url.pathname)));
+  } else if (url.pathname.endsWith('/catalogue.json')) event.respondWith(serveCatalogue(event));
   else if (request.mode === 'navigate') event.respondWith(serveShell(event, './'));
-  else event.respondWith(serveShell(event, request));
+  else if (isShellAsset(request.url, self.registration.scope, SHELL_ASSETS)) {
+    event.respondWith(serveShell(event, request));
+  }
+  // Toute autre requête va au réseau, sans passer par le cache.
 });

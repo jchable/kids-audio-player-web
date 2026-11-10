@@ -16,3 +16,14 @@ test('tous les scripts du site sont dans le shell', () => {
     .map((f) => `js/${f.replaceAll('\\', '/')}`);
   for (const script of scripts) assert.ok(assets.includes(script), script);
 });
+
+test('index.html déclare une politique de sécurité limitée à l\'origine du site', () => {
+  const html = fs.readFileSync('index.html', 'utf8');
+  const policy = /<meta http-equiv="Content-Security-Policy" content="([^"]+)">/.exec(html)?.[1];
+  assert.ok(policy, 'balise CSP absente');
+  assert.match(policy, /default-src 'self'/);
+  assert.match(policy, /script-src 'self'(;|$)/);
+  assert.match(policy, /object-src 'none'/);
+  assert.match(policy, /base-uri 'none'/);
+  assert.doesNotMatch(policy, /unsafe-eval|https?:|\*/);
+});

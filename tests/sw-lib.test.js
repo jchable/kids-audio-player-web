@@ -81,3 +81,41 @@ test('carryOver reprend le catalogue et les couvertures de la version précéden
   await SwLib.carryOver(caches, 'lecteur-shell-v2', 'lecteur-shell-');
   assert.deepEqual([...fresh.store.keys()].sort(), ['https://s/bibliotheque/l/c.jpg', 'https://s/catalogue.json']);
 });
+
+test('withSvgPolicy : un SVG ouvert directement ne peut exécuter aucun script', async () => {
+  const original = new Response('<svg/>', { status: 200, headers: { 'Content-Type': 'image/svg+xml' } });
+  const hardened = SwLib.withSvgPolicy(original, '/bibliotheque/livre/couverture.svg');
+  const policy = hardened.headers.get('Content-Security-Policy');
+  assert.match(policy, /sandbox/);
+  assert.match(policy, /default-src 'none'/);
+  assert.equal(hardened.headers.get('X-Content-Type-Options'), 'nosniff');
+  assert.equal(hardened.headers.get('Content-Type'), 'image/svg+xml');
+  assert.equal(hardened.status, 200);
+  assert.equal(await hardened.text(), '<svg/>');
+});
+
+test('withSvgPolicy : extension en majuscules ou type déclaré par le serveur', () => {
+  const upper = SwLib.withSvgPolicy(new Response('x'), '/bibliotheque/l/01.SVG');
+  assert.match(upper.headers.get('Content-Security-Policy'), /sandbox/);
+  const typed = SwLib.withSvgPolicy(
+    new Response('x', { headers: { 'Content-Type': 'image/svg+xml; charset=utf-8' } }),
+    '/bibliotheque/l/image',
+  );
+  assert.match(typed.headers.get('Content-Security-Policy'), /sandbox/);
+});
+
+test('withSvgPolicy : les autres images sont rendues telles quelles', () => {
+  const jpeg = new Response('x', { headers: { 'Content-Type': 'image/jpeg' } });
+  assert.equal(SwLib.withSvgPolicy(jpeg, '/bibliotheque/l/couverture.jpg'), jpeg);
+});
+
+test('isShellAsset : seuls les fichiers de l\'application sont mis en cache', () => {
+  const scope = 'https://s/app/';
+  const assets = ['./', 'js/main.js', 'css/app.css'];
+  assert.ok(SwLib.isShellAsset('https://s/app/js/main.js', scope, assets));
+  assert.ok(SwLib.isShellAsset('https://s/app/css/app.css?v=2', scope, assets));
+  assert.ok(SwLib.isShellAsset('https://s/app/', scope, assets));
+  assert.ok(!SwLib.isShellAsset('https://s/app/js/autre.js', scope, assets));
+  assert.ok(!SwLib.isShellAsset('https://s/app/docs/notes.md', scope, assets));
+  assert.ok(!SwLib.isShellAsset('https://s/js/main.js', scope, assets));
+});

@@ -40,6 +40,23 @@ globalThis.SwLib = {
     return /\/bibliotheque\/.+\.mp3$/i.test(pathname);
   },
 
+  /* Un SVG ouvert directement (lien, QR code) pourrait exécuter un script sur l'origine du site.
+     Affiché par <img>, il n'est pas concerné par cette politique et reste identique. */
+  withSvgPolicy(response, pathname) {
+    const type = response.headers.get('Content-Type') || '';
+    if (!/\.svg$/i.test(pathname) && !/^image\/svg\+xml/i.test(type)) return response;
+    const headers = new Headers(response.headers);
+    headers.set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    headers.set('X-Content-Type-Options', 'nosniff');
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  },
+
+  /* Seuls les fichiers de l'application vont dans le cache du shell. */
+  isShellAsset(url, scope, assets) {
+    const { origin, pathname } = new URL(url);
+    return assets.some((asset) => new URL(asset, scope).href === origin + pathname);
+  },
+
   isValidCatalogueText(text) {
     try {
       return Array.isArray(JSON.parse(text).books);
