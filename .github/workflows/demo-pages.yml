@@ -1,0 +1,57 @@
+# Démo publique sur GitHub Pages, avec la bibliothèque d'exemple uniquement.
+# Les livres de bibliotheque/ ne sont jamais publiés : le dossier est vidé avant de créer l'exemple.
+name: Démo GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Tests
+        run: npm test
+
+      - name: Bibliothèque de démonstration
+        run: |
+          find bibliotheque -mindepth 1 -maxdepth 1 ! -name .gitkeep -exec rm -rf {} +
+          npm run exemple
+          npm run catalogue
+
+      - name: Assemblage du site
+        # Uniquement les fichiers listés dans le README (Hébergement), jamais la racine du dépôt.
+        run: |
+          mkdir _site
+          cp -r index.html manifest.webmanifest sw.js catalogue.json css js fonts icons img bibliotheque _site/
+          rm -f _site/bibliotheque/.gitkeep
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
