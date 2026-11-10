@@ -166,6 +166,18 @@ addEventListener('resize', () => {
 
 addEventListener('hashchange', render);
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('message', async (event) => {
+    if (event.data?.type !== 'catalogue-updated') return;
+    const updated = parseCatalogue(await (await fetch('catalogue.json')).text());
+    const { active } = engine.getState();
+    if (!updated || (active && !findBook(updated, active.bookId))) return;
+    catalogue = updated;
+    if (currentRoute().name === 'shelf') render();
+  });
+}
+
 async function start() {
   const response = await fetch('catalogue.json');
   catalogue = parseCatalogue(await response.text());
