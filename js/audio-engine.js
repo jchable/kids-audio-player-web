@@ -98,6 +98,7 @@ export function createAudioEngine({
       updateMetadata();
     } else {
       if (failed) reloadChapter();
+      if (time !== null) skippedToEnd = false; // rejouer depuis un point précis peut de nouveau donner l'étoile
       if (time !== null && pendingTime !== null) pendingTime = time;
       else if (time !== null) audio.currentTime = time;
     }
@@ -109,6 +110,7 @@ export function createAudioEngine({
   function go(command) {
     if (!command) return;
     if (!isAvailable(command.bookId, command.chapterId)) {
+      audio.pause(); // sinon l'icône d'erreur s'affiche pendant que l'ancien chapitre continue
       fail('unavailable');
       return;
     }

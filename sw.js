@@ -1,7 +1,7 @@
 /* Service worker : application disponible hors-ligne, audio servi depuis les téléchargements. */
 importScripts('js/sw-lib.js');
 
-const SHELL_CACHE = 'lecteur-shell-v1';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
+const SHELL_CACHE = 'lecteur-shell-v2';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
 const AUDIO_CACHE = 'lecteur-audio-v1';  // Ne jamais renommer : contient les téléchargements
 
 const {
@@ -66,6 +66,7 @@ self.addEventListener('activate', (event) => {
 });
 
 async function serveAudio(request) {
+  if (request.cache === 'no-store') return fetch(request); // téléchargement explicite : toujours le réseau
   const cache = await caches.open(AUDIO_CACHE);
   const cached = await cache.match(request.url, { ignoreSearch: true });
   if (!cached) return fetch(request);
@@ -92,6 +93,7 @@ async function serveAudio(request) {
 }
 
 async function serveImage(request) {
+  if (request.cache === 'no-store') return fetch(request);
   const audioCache = await caches.open(AUDIO_CACHE);
   const shellCache = await caches.open(SHELL_CACHE);
   return (await audioCache.match(request.url, { ignoreSearch: true }))

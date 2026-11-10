@@ -180,3 +180,33 @@ test('extensions d\'image en majuscules reconnues', () => {
   assert.equal(catalogue.books[0].cover, 'bibliotheque/livre/couverture.PNG');
   assert.equal(catalogue.books[0].chapters[0].image, 'bibliotheque/livre/a.JPG');
 });
+
+test('titres vides ou non textuels dans album.json : repli sur le nom', () => {
+  const album = JSON.stringify({
+    title: '   ',
+    chapters: { '01-la-foret.mp3': { title: '  ' }, '02-le-miel.mp3': { title: { x: 1 } } },
+  });
+  const { catalogue } = build({
+    'le-petit-ours': { 'album.json': album, '01-la-foret.mp3': 'x', '02-le-miel.mp3': 'x' },
+  });
+  const [book] = catalogue.books;
+  assert.equal(book.title, 'Le petit ours');
+  assert.deepEqual(book.chapters.map((c) => c.title), ['La foret', 'Le miel']);
+});
+
+test('un titre de livre non textuel est ignoré', () => {
+  const { catalogue } = build({ 'le-livre': { 'album.json': '{"title": 42}', 'a.mp3': 'x' } });
+  assert.equal(catalogue.books[0].title, 'Le livre');
+});
+
+test('fichiers cachés (.mp3, ._01.mp3 de macOS) ignorés', () => {
+  const { catalogue } = build({ livre: { 'a.mp3': 'x', '.mp3': 'x', '._a.mp3': 'x' } });
+  assert.deepEqual(catalogue.books[0].chapters.map((c) => c.id), ['a.mp3']);
+});
+
+test('tag ID3 tronqué : le livre reste dans le catalogue', () => {
+  const truncated = Buffer.from([0x49, 0x44, 0x33, 3, 0, 0x40, 0, 0, 0, 0x0a]);
+  const { catalogue } = build({ livre: { '01-la-foret.mp3': truncated } });
+  assert.equal(catalogue.books.length, 1);
+  assert.equal(catalogue.books[0].chapters[0].title, 'La foret');
+});

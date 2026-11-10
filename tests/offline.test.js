@@ -292,6 +292,45 @@ test('mise à jour avec serveur injoignable : le livre reste intact', async () =
   assert.equal(caches.stores.get('lecteur-audio-v1').size, 4);
 });
 
+test('fichier de mauvaise taille : retéléchargé même si le service worker sert l\'ancien', async () => {
+  const caches = fakeCaches();
+  // Comme sw.js : une copie en cache est renvoyée à la place du réseau.
+  const offline = createOffline({
+    caches,
+    fetch: async (url) => {
+      const cached = await (await caches.open('lecteur-audio-v1')).match(url);
+      return cached || new Response('x'.repeat(url.endsWith('a.mp3') ? 5 : 1));
+    },
+    persist: async () => true,
+  });
+  (await caches.open('lecteur-audio-v1')).put('b/a.mp3', new Response('ancien-abime'));
+  await offline.download(makeBook({ size: 5 }));
+  const stored = await (await caches.open('lecteur-audio-v1')).match('b/a.mp3');
+  assert.equal((await stored.blob()).size, 5);
+  assert.equal(offline.status('b'), 'downloaded');
+});
+
+test('mise à jour lancée deux fois de suite : un seul téléchargement', async () => {
+  const c = setup();
+  await c.offline.download(makeBook({ title: 'Ancien' }));
+  const fresh = makeBook({ title: 'Nouveau', size: 2 });
+  await c.offline.reconcile({ books: [fresh] });
+  c.fetched.length = 0;
+  await Promise.all([c.offline.download(fresh), c.offline.download(fresh)]);
+  assert.equal(c.fetched.filter((u) => u !== 'catalogue.json').length, 3);
+});
+
+test('mise à jour avec serveur injoignable : le statut update est rétabli', async () => {
+  const c = setup();
+  await c.offline.download(makeBook());
+  const fresh = makeBook({ size: 2 });
+  await c.offline.reconcile({ books: [fresh] });
+  c.failAt = 1;
+  c.fetched.length = 0;
+  await c.offline.download(fresh);
+  assert.equal(c.offline.status('b'), 'update');
+});
+
 test('reconcile ne fait jamais échouer le démarrage', async () => {
   const offline = createOffline({
     caches: { open: async () => { throw new Error('non'); } },

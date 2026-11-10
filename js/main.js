@@ -29,6 +29,7 @@ installImageFallback(document);
 let serverCatalogue = null;
 let catalogue = null;
 let serverUp = true;
+let serviceWorkerReady = false; // sans worker actif, un « téléchargé » ne servirait à rien hors-ligne
 let lastActiveKey = null;
 let shownNowPlayingKey = null;
 const seenBooks = new Map(); // un livre en écoute reste connu même s'il disparaît du catalogue
@@ -118,11 +119,11 @@ function showShelf() {
 
 function mountDownload(book) {
   const slot = root.querySelector('.path-action');
-  if (!slot || !offline.supported) return;
+  if (!slot || !offline.supported || !serviceWorkerReady) return;
   renderDownloadButton(slot, {
     status: offline.status(book.id),
     progress: progress.get(book.id) || 0,
-    onDownload: () => startDownload(book.id),
+    onDownload: guarded(() => startDownload(book.id)),
     onRemove: () => removeDownload(book.id),
   });
 }
@@ -133,6 +134,7 @@ function refreshDownloadButton(bookId) {
 }
 
 async function startDownload(bookId) {
+  if (offline.status(bookId) === 'downloading') return;
   const book = (serverCatalogue && findBook(serverCatalogue, bookId)) || getBook(bookId);
   progress.set(bookId, 0);
   const running = offline.download(book, (done, total) => {
@@ -273,6 +275,11 @@ document.addEventListener('visibilitychange', () => {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.ready.then(() => {
+    serviceWorkerReady = true;
+    const route = currentRoute();
+    if (route.name === 'path' && getBook(route.bookId)) refreshDownloadButton(route.bookId);
+  });
   navigator.serviceWorker.addEventListener('message', async (event) => {
     if (event.data?.type !== 'catalogue-updated') return;
     const updated = await loadCatalogue();

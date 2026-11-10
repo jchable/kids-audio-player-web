@@ -393,6 +393,26 @@ test('revenir en arrière après avoir été au bout rend l\'étoile possible', 
   assert.equal(store.isStarred('b', 'c1'), true);
 });
 
+test('rejouer un chapitre déjà mené au bout par le curseur redonne l\'étoile', () => {
+  const { audio, engine, store } = setup();
+  engine.apply(play('c1'));
+  audio.ready();
+  engine.seek(100);
+  engine.apply(play('c1', 0));
+  audio.fire('ended');
+  assert.equal(store.isStarred('b', 'c1'), true);
+});
+
+test('suivant indisponible pendant la lecture : le son s\'arrête', () => {
+  const { audio, engine } = setup({ available: (_, id) => id !== 'c2' });
+  engine.apply(play('c1'));
+  audio.ready();
+  engine.next();
+  assert.equal(audio.paused, true);
+  assert.equal(engine.getState().error, 'unavailable');
+  assert.equal(engine.getState().active.chapterId, 'c1');
+});
+
 test('fonctionne sans Media Session', () => {
   const audio = new FakeAudio();
   const engine = createAudioEngine({

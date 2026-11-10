@@ -113,9 +113,13 @@ export function createOffline({
 
     async download(book, onProgress = () => {}) {
       const previous = statuses.get(book.id);
-      // La mise à jour supprime d'abord le livre : jamais sans serveur joignable.
-      if (previous === 'update' && !(await pingServer())) return;
+      if (previous === 'downloading') return; // un second appui ne lance pas un second téléchargement
       statuses.set(book.id, 'downloading');
+      // La mise à jour supprime d'abord le livre : jamais sans serveur joignable.
+      if (previous === 'update' && !(await pingServer())) {
+        statuses.set(book.id, previous);
+        return;
+      }
       known.set(book.id, book);
       try {
         await requestPersistence();
@@ -125,6 +129,7 @@ export function createOffline({
         let done = 0;
         for (const asset of book.assets) {
           if (!(await hasCurrentFile(cache, asset))) {
+            await cache.delete(asset.src); // sinon le service worker resservirait l'ancien fichier
             const response = await fetchFn(asset.src, { cache: 'no-store' });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             await cache.put(asset.src, response);

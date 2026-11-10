@@ -5,6 +5,7 @@ import { readId3Title } from './id3.js';
 
 const LIBRARY = 'bibliotheque';
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'svg'];
+const usableTitle = (value) => (typeof value === 'string' && value.trim() ? value.trim() : null);
 const naturalCompare = (a, b) => a.localeCompare(b, 'fr', { numeric: true });
 
 export function cleanTitle(fileName) {
@@ -27,6 +28,15 @@ function readAlbum(dir, bookId, warnings) {
   }
 }
 
+/* Un tag illisible ne doit pas écarter tout le livre. */
+function id3TitleOf(file) {
+  try {
+    return usableTitle(readId3Title(fs.readFileSync(file)));
+  } catch {
+    return null;
+  }
+}
+
 function findImage(names, base) {
   for (const extension of IMAGE_EXTENSIONS) {
     const wanted = `${base}.${extension}`.toLowerCase();
@@ -40,7 +50,7 @@ function buildBook(root, bookId, warnings) {
   const dir = path.join(root, LIBRARY, bookId);
   const names = fs.readdirSync(dir);
   const audioFiles = names
-    .filter((n) => /\.mp3$/i.test(n) && fs.statSync(path.join(dir, n)).isFile())
+    .filter((n) => !n.startsWith('.') && /\.mp3$/i.test(n) && fs.statSync(path.join(dir, n)).isFile())
     .sort(naturalCompare);
   if (audioFiles.length === 0) {
     warnings.push(`${bookId} : aucun MP3, livre écarté`);
@@ -64,14 +74,14 @@ function buildBook(root, bookId, warnings) {
     const imageName = findImage(names, id.replace(/\.mp3$/i, ''));
     return {
       id,
-      title: meta.title || readId3Title(fs.readFileSync(path.join(dir, id))) || cleanTitle(id),
+      title: usableTitle(meta.title) || id3TitleOf(path.join(dir, id)) || cleanTitle(id),
       src: addAsset(id),
       image: imageName ? addAsset(imageName) : null,
       lyrics: meta.lyrics || null,
     };
   });
 
-  return { id: bookId, title: album.title || cleanTitle(bookId), cover, chapters, assets };
+  return { id: bookId, title: usableTitle(album.title) || cleanTitle(bookId), cover, chapters, assets };
 }
 
 export function buildCatalogue(rootDir, now) {
