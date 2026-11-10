@@ -15,12 +15,15 @@ function stepHtml(book, chapter, index, point, available) {
     </button>`;
 }
 
-export function updatePath(root, { book, saved, isStarred }) {
+export function updatePath(root, {
+  book, saved, isStarred, failedChapterId = null,
+}) {
   const current = saved ? saved.chapterId : book.chapters[0].id;
   root.querySelectorAll('.step').forEach((step) => {
     const { chapterId } = step.dataset;
     step.classList.toggle('current', chapterId === current);
     step.classList.toggle('starred', isStarred(book.id, chapterId));
+    step.classList.toggle('failed', chapterId === failedChapterId);
   });
 }
 

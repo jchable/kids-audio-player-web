@@ -15,6 +15,10 @@ import {
 import { renderPath, updatePath } from './views/path.js';
 import { renderPlayer, updatePlayer } from './views/player.js';
 import { renderShelf } from './views/shelf.js';
+import { renderEmptyLibrary, renderLoadFailure } from './views/states.js';
+
+const CATALOGUE_TIMEOUT_MS = 3000;
+const CATALOGUE_RETRY_MS = 10000;
 
 const root = document.getElementById('app');
 const nowPlayingRoot = document.getElementById('now-playing');
@@ -91,6 +95,11 @@ function syncNowPlaying(route) {
 }
 
 function showShelf() {
+  if (catalogue.books.length === 0) {
+    if (serverCatalogue) renderEmptyLibrary(root);
+    else renderLoadFailure(root);
+    return;
+  }
   renderShelf(root, {
     catalogue,
     isBookAvailable,
@@ -143,6 +152,16 @@ async function refreshServer() {
   return up;
 }
 
+function syncPath(book) {
+  const { error, active } = engine.getState();
+  updatePath(root, {
+    book,
+    saved: store.getPosition(book.id),
+    isStarred: store.isStarred,
+    failedChapterId: error && active && active.bookId === book.id ? active.chapterId : null,
+  });
+}
+
 function showPath(book, scrollToCurrent) {
   renderPath(root, {
     book,
@@ -166,6 +185,7 @@ function showPath(book, scrollToCurrent) {
     },
   });
   mountDownload(book);
+  syncPath(book);
 }
 
 function showPlayer(book, route) {
@@ -218,7 +238,7 @@ function onEngineChange() {
   if (route.name === 'player') updatePlayer(root, state);
   else if (route.name === 'path') {
     const book = getBook(route.bookId);
-    if (book) updatePath(root, { book, saved: store.getPosition(book.id), isStarred: store.isStarred });
+    if (book) syncPath(book);
   }
   syncNowPlaying(route);
 }
@@ -246,12 +266,36 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
   navigator.serviceWorker.addEventListener('message', async (event) => {
     if (event.data?.type !== 'catalogue-updated') return;
-    const updated = parseCatalogue(await (await fetch('catalogue.json')).text());
+    const updated = await loadCatalogue();
     if (!updated) return;
     await offline.reconcile(updated);
     setCatalogue(updated);
     if (currentRoute().name !== 'player') render(false);
   });
+}
+
+async function loadCatalogue() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CATALOGUE_TIMEOUT_MS);
+  try {
+    const response = await fetch('catalogue.json', { signal: controller.signal });
+    return response.ok ? parseCatalogue(await response.text()) : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function retryLoadingCatalogue() {
+  const loaded = await loadCatalogue();
+  if (!loaded) {
+    setTimeout(retryLoadingCatalogue, CATALOGUE_RETRY_MS);
+    return;
+  }
+  await offline.reconcile(loaded);
+  setCatalogue(loaded);
+  if (currentRoute().name !== 'player') render(false);
 }
 
 async function restoreLastListening() {
@@ -266,11 +310,11 @@ async function restoreLastListening() {
 }
 
 async function start() {
-  const response = await fetch('catalogue.json');
-  const loaded = parseCatalogue(await response.text());
+  const loaded = await loadCatalogue();
   await offline.reconcile(loaded);
   setCatalogue(loaded);
   render();
+  if (!loaded) setTimeout(retryLoadingCatalogue, CATALOGUE_RETRY_MS);
   await refreshServer();
   await restoreLastListening();
   render(false);

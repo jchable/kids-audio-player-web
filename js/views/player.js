@@ -12,7 +12,9 @@ function setProgress(root, ratio) {
 export function updatePlayer(root, state) {
   const toggle = root.querySelector('.toggle');
   if (!toggle) return;
-  const icon = state.playing ? 'pause' : 'play';
+  root.querySelector('.player').classList.toggle('has-error', Boolean(state.error));
+  let icon = state.playing ? 'pause' : 'play';
+  if (state.error) icon = 'retry';
   if (toggle.dataset.icon !== icon) {
     toggle.dataset.icon = icon;
     toggle.innerHTML = iconHtml(icon);

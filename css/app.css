@@ -338,6 +338,35 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 
 .now-toggle { background: var(--orange); color: var(--white); }
 
+/* ----- Erreurs et états vides ----- */
+@keyframes shake {
+  0%, 100% { translate: 0; }
+  20%, 60% { translate: -8px; }
+  40%, 80% { translate: 8px; }
+}
+
+.has-error .player-page { filter: grayscale(1); animation: shake .5s 2; }
+
+.has-error .toggle { background: #FFB400; color: var(--ink); }
+
+.step.failed .step-image { filter: grayscale(1); border-color: #E8483F; animation: shake .5s 2; }
+
+.state {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.state svg { width: min(70vw, 340px); }
+
+.state p { margin: 0; font-size: 18px; opacity: .7; }
+
 /* ----- Téléchargement ----- */
 .download { background: var(--white); color: var(--grass-ink); }
 
