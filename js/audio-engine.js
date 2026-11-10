@@ -3,6 +3,7 @@ import { previous as previousCommand, next as nextCommand, onEnded } from './pla
 
 const SAVE_EVERY_SECONDS = 5;
 const STALL_LIMIT_MS = 8000;
+const SEEK_END_MARGIN_SECONDS = 1;
 
 const IMAGE_TYPES = { png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml' };
 const imageType = (src) => IMAGE_TYPES[src.split('.').pop().toLowerCase()] || 'image/jpeg';
@@ -16,6 +17,7 @@ export function createAudioEngine({
   let error = null;
   let pendingTime = null;
   let lastSavedTime = 0;
+  let skippedToEnd = false; // une fin atteinte en déplaçant le curseur ne mérite pas d'étoile
   let stallTimer = null;
   const listeners = new Set();
   const finishedHandlers = new Set();
@@ -65,8 +67,14 @@ export function createAudioEngine({
     mediaSession.metadata = new Metadata({ title: chapter.title, album: book.title, artwork });
   }
 
+  function reloadChapter() {
+    pendingTime = lastSavedTime;
+    audio.load();
+  }
+
   function startPlaying() {
-    armStall();
+    // play() sur un audio déjà en lecture n'émet aucun événement qui désarmerait la minuterie.
+    if (audio.paused || audio.readyState < 3) armStall();
     const result = audio.play();
     if (result && result.catch) result.catch(() => { disarmStall(); playing = false; notify(); });
   }
@@ -74,6 +82,7 @@ export function createAudioEngine({
   function apply(command) {
     const { bookId, chapterId, time, play } = command;
     const sameChapter = active && active.bookId === bookId && active.chapterId === chapterId;
+    const failed = Boolean(error || audio.error);
     error = null;
 
     if (!sameChapter) {
@@ -82,12 +91,15 @@ export function createAudioEngine({
       active = { bookId, chapterId };
       pendingTime = time || 0;
       lastSavedTime = pendingTime;
+      skippedToEnd = false;
       audio.src = chapter.src;
       store.setPosition(bookId, chapterId, pendingTime);
       store.setLast(bookId);
       updateMetadata();
-    } else if (time !== null) {
-      audio.currentTime = time;
+    } else {
+      if (failed) reloadChapter();
+      if (time !== null && pendingTime !== null) pendingTime = time;
+      else if (time !== null) audio.currentTime = time;
     }
 
     if (play) startPlaying();
@@ -120,7 +132,7 @@ export function createAudioEngine({
     const { bookId, chapterId } = active;
     const book = getBook(bookId);
     const result = onEnded(book, chapterId);
-    store.star(bookId, result.star);
+    if (!skippedToEnd) store.star(bookId, result.star);
     if (result.finished) {
       finish(bookId);
     } else if (isAvailable(bookId, result.command.chapterId)) {
@@ -167,8 +179,16 @@ export function createAudioEngine({
     restore: apply,
     toggle() {
       if (!active) return;
+      const failed = Boolean(error || audio.error);
       error = null;
-      if (audio.paused) startPlaying(); else audio.pause();
+      if (failed) {
+        reloadChapter();
+        startPlaying();
+      } else if (audio.paused) {
+        startPlaying();
+      } else {
+        audio.pause();
+      }
       notify();
     },
     markUnavailable() {
@@ -176,6 +196,7 @@ export function createAudioEngine({
       fail('unavailable');
     },
     seek(seconds) {
+      skippedToEnd = seconds >= audio.duration - SEEK_END_MARGIN_SECONDS;
       audio.currentTime = seconds;
       notify();
     },

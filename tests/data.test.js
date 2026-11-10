@@ -118,3 +118,10 @@ test('storage qui lève une exception', () => {
   assert.equal(s.isStarred('a', 'b'), false);
   assert.equal(s.getLast(), null);
 });
+
+test('accéder au stockage peut lever une exception', () => {
+  const s = createStore(() => { throw new DOMException('non', 'SecurityError'); });
+  s.setPosition('a', 'b', 3);
+  assert.equal(s.getPosition('a'), null);
+  assert.equal(s.getLast(), null);
+});

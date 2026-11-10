@@ -4,11 +4,13 @@ importScripts('js/sw-lib.js');
 const SHELL_CACHE = 'lecteur-shell-v1';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
 const AUDIO_CACHE = 'lecteur-audio-v1';  // Ne jamais renommer : contient les téléchargements
 
-const { parseRange, isAudioPath, isValidCatalogueText } = self.SwLib;
+const {
+  parseRange, isAudioPath, isValidCatalogueText, precache, carryOver,
+} = self.SwLib;
 
 const SHELL_ASSETS = [
   './', 'manifest.webmanifest', 'css/app.css',
-  'js/audio-engine.js', 'js/catalog.js', 'js/dom.js', 'js/main.js', 'js/offline.js',
+  'js/audio-engine.js', 'js/catalog.js', 'js/dom.js', 'js/input-guard.js', 'js/main.js', 'js/offline.js',
   'js/path-layout.js', 'js/playback.js', 'js/router.js', 'js/store.js', 'js/sw-lib.js',
   'js/views/download-button.js', 'js/views/now-playing.js', 'js/views/path.js',
   'js/views/player.js', 'js/views/shelf.js', 'js/views/states.js',
@@ -46,7 +48,8 @@ async function refreshCatalogue(cache, request) {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
-    await Promise.allSettled(SHELL_ASSETS.map((asset) => cache.add(asset)));
+    await precache(cache, SHELL_ASSETS, (asset) => new Request(asset, { cache: 'reload' }));
+    await carryOver(caches, SHELL_CACHE, 'lecteur-shell-');
     await refreshCatalogue(cache, 'catalogue.json').catch(() => null);
     await self.skipWaiting();
   })());

@@ -44,6 +44,27 @@ export function createOffline({
     copies.delete(bookId);
   }
 
+  /* Un fichier d'une ancienne version, laissé par une interruption, ne compte pas. */
+  async function hasCurrentFile(cache, asset) {
+    const cached = await cache.match(asset.src);
+    return Boolean(cached) && (await cached.blob()).size === asset.size;
+  }
+
+  async function pingServer() {
+    const controller = new AbortController();
+    const timer = setTimer(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchFn('catalogue.json', {
+        method: 'HEAD', cache: 'no-store', signal: controller.signal,
+      });
+      return response.ok;
+    } catch {
+      return false;
+    } finally {
+      clearTimer(timer);
+    }
+  }
+
   async function requestPersistence() {
     try {
       await persist();
@@ -58,26 +79,28 @@ export function createOffline({
       for (const [id, book] of serverBooks) known.set(id, book);
       if (!caches) return;
 
-      const cache = await open();
-      const stored = await readCopies(cache);
-      copies.clear();
-      for (const copy of stored) {
-        known.set(copy.id, known.get(copy.id) || copy);
-        if (statuses.get(copy.id) !== 'downloading') {
-          if ((await countPresent(cache, copy)) === copy.assets.length) {
-            copies.set(copy.id, copy);
-            statuses.set(copy.id, statusOfCopy(copy));
-          } else {
-            statuses.set(copy.id, 'failed');
+      try {
+        const cache = await open();
+        const stored = await readCopies(cache);
+        copies.clear();
+        for (const copy of stored) {
+          known.set(copy.id, known.get(copy.id) || copy);
+          if (statuses.get(copy.id) !== 'downloading') {
+            if ((await countPresent(cache, copy)) === copy.assets.length) {
+              copies.set(copy.id, copy);
+              statuses.set(copy.id, statusOfCopy(copy));
+            } else {
+              statuses.set(copy.id, 'failed');
+            }
           }
         }
-      }
-      const storedIds = new Set(stored.map((c) => c.id));
-      for (const [id, book] of serverBooks) {
-        if (!storedIds.has(id) && statuses.get(id) !== 'downloading') {
-          statuses.set(id, (await countPresent(cache, book)) > 0 ? 'failed' : 'none');
+        const storedIds = new Set(stored.map((c) => c.id));
+        for (const [id, book] of serverBooks) {
+          if (!storedIds.has(id) && statuses.get(id) !== 'downloading') {
+            statuses.set(id, (await countPresent(cache, book)) > 0 ? 'failed' : 'none');
+          }
         }
-      }
+      } catch { /* cache illisible : l'application démarre sans téléchargements */ }
     },
 
     snapshots() {
@@ -90,6 +113,8 @@ export function createOffline({
 
     async download(book, onProgress = () => {}) {
       const previous = statuses.get(book.id);
+      // La mise à jour supprime d'abord le livre : jamais sans serveur joignable.
+      if (previous === 'update' && !(await pingServer())) return;
       statuses.set(book.id, 'downloading');
       known.set(book.id, book);
       try {
@@ -99,8 +124,8 @@ export function createOffline({
 
         let done = 0;
         for (const asset of book.assets) {
-          if (!(await cache.match(asset.src))) {
-            const response = await fetchFn(asset.src);
+          if (!(await hasCurrentFile(cache, asset))) {
+            const response = await fetchFn(asset.src, { cache: 'no-store' });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             await cache.put(asset.src, response);
           }
@@ -125,19 +150,6 @@ export function createOffline({
       return serverUp || isComplete(book.id);
     },
 
-    async pingServer() {
-      const controller = new AbortController();
-      const timer = setTimer(() => controller.abort(), timeoutMs);
-      try {
-        const response = await fetchFn('catalogue.json', {
-          method: 'HEAD', cache: 'no-store', signal: controller.signal,
-        });
-        return response.ok;
-      } catch {
-        return false;
-      } finally {
-        clearTimer(timer);
-      }
-    },
+    pingServer,
   };
 }

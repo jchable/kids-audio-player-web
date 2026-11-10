@@ -11,7 +11,7 @@ function decodeText(bytes) {
   } else if (encoding === 3) {
     text = data.toString('utf8');
   } else if (encoding === 1 && data[0] === 0xfe && data[1] === 0xff) {
-    text = Buffer.from(data.subarray(2)).swap16().toString('utf16le');
+    text = Buffer.from(data.subarray(2, 2 + ((data.length - 2) & ~1))).swap16().toString('utf16le');
   } else if (encoding === 1) {
     text = data.subarray(data[0] === 0xff ? 2 : 0).toString('utf16le');
   } else if (encoding === 2) {

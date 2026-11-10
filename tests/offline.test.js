@@ -180,7 +180,7 @@ test('mise à jour : télécharge la nouvelle version', async () => {
   c.fetched.length = 0;
   await c.offline.download(fresh);
   assert.equal(c.offline.status('b'), 'downloaded');
-  assert.equal(c.fetched.length, 3);
+  assert.equal(c.fetched.filter((u) => u !== 'catalogue.json').length, 3);
   assert.deepEqual(c.offline.snapshots().map((b) => b.title), ['Nouveau']);
 });
 
@@ -251,4 +251,53 @@ test('sans Cache API : non pris en charge, sans erreur', async () => {
   await offline.reconcile({ books: [makeBook()] });
   assert.equal(offline.status('b'), 'none');
   assert.deepEqual(offline.snapshots(), []);
+});
+
+test('les fichiers contournent le cache HTTP du navigateur', async () => {
+  const inits = [];
+  const offline = createOffline({
+    caches: fakeCaches(),
+    fetch: async (url, init) => { inits.push(init); return new Response('x'); },
+    persist: async () => true,
+  });
+  await offline.download(makeBook());
+  assert.ok(inits.length === 3 && inits.every((i) => i.cache === 'no-store'));
+});
+
+test('reprise : un fichier d\'une ancienne version est retéléchargé', async () => {
+  const c = setup({ failAt: 3 });
+  await c.offline.download(makeBook());
+  c.failAt = Infinity;
+  c.fetched.length = 0;
+  await c.offline.download(makeBook({ size: 5 }));
+  assert.deepEqual(c.fetched, ['b/a.mp3', 'b/c.mp3']);
+});
+
+test('mise à jour avec serveur injoignable : le livre reste intact', async () => {
+  const caches = fakeCaches();
+  let reachable = true;
+  const offline = createOffline({
+    caches,
+    fetch: async () => {
+      if (!reachable) throw new TypeError('injoignable');
+      return new Response('x');
+    },
+    persist: async () => true,
+  });
+  await offline.download(makeBook());
+  await offline.reconcile({ books: [makeBook({ title: 'Nouveau', size: 2 })] });
+  reachable = false;
+  await offline.download(makeBook({ title: 'Nouveau', size: 2 }));
+  assert.equal(offline.status('b'), 'update');
+  assert.equal(caches.stores.get('lecteur-audio-v1').size, 4);
+});
+
+test('reconcile ne fait jamais échouer le démarrage', async () => {
+  const offline = createOffline({
+    caches: { open: async () => { throw new Error('non'); } },
+    fetch: async () => new Response('x'),
+    persist: async () => true,
+  });
+  await offline.reconcile({ books: [makeBook()] });
+  assert.equal(offline.status('b'), 'none');
 });

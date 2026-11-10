@@ -8,11 +8,11 @@ const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'svg'];
 const naturalCompare = (a, b) => a.localeCompare(b, 'fr', { numeric: true });
 
 export function cleanTitle(fileName) {
-  const text = fileName
-    .replace(/\.[a-z0-9]{2,4}$/i, '')
+  const stem = fileName.replace(/\.[a-z0-9]{2,4}$/i, '');
+  const text = stem
     .replace(/^\d+[\s._-]*/, '')
     .replace(/[-_]+/g, ' ')
-    .trim();
+    .trim() || stem; // un fichier nommé « 01.mp3 » garde quand même un titre
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
@@ -28,15 +28,20 @@ function readAlbum(dir, bookId, warnings) {
 }
 
 function findImage(names, base) {
-  return IMAGE_EXTENSIONS
-    .map((ext) => `${base}.${ext}`)
-    .find((candidate) => names.includes(candidate)) || null;
+  for (const extension of IMAGE_EXTENSIONS) {
+    const wanted = `${base}.${extension}`.toLowerCase();
+    const found = names.find((name) => name.toLowerCase() === wanted);
+    if (found) return found;
+  }
+  return null;
 }
 
 function buildBook(root, bookId, warnings) {
   const dir = path.join(root, LIBRARY, bookId);
   const names = fs.readdirSync(dir);
-  const audioFiles = names.filter((n) => /\.mp3$/i.test(n)).sort(naturalCompare);
+  const audioFiles = names
+    .filter((n) => /\.mp3$/i.test(n) && fs.statSync(path.join(dir, n)).isFile())
+    .sort(naturalCompare);
   if (audioFiles.length === 0) {
     warnings.push(`${bookId} : aucun MP3, livre écarté`);
     return null;
@@ -76,7 +81,14 @@ export function buildCatalogue(rootDir, now) {
     .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
     .map((e) => e.name)
     .sort(naturalCompare)
-    .map((id) => buildBook(rootDir, id, warnings))
+    .map((id) => {
+      try {
+        return buildBook(rootDir, id, warnings);
+      } catch (error) {
+        warnings.push(`${id} : illisible, livre écarté (${error.message})`);
+        return null;
+      }
+    })
     .filter(Boolean);
   return { catalogue: { version: 1, generatedAt: now.toISOString(), books }, warnings };
 }

@@ -13,15 +13,23 @@ class FakeAudio extends EventTarget {
   currentTime = 0;
   duration = 100;
   paused = true;
+  readyState = 0;
+  error = null;
+  loadCalls = 0;
   #src = '';
   get src() { return this.#src; }
   set src(value) { this.#src = value; this.loads += 1; this.currentTime = 0; }
   removeAttribute() { this.#src = ''; }
-  load() {}
-  play() { this.paused = false; this.fire('play'); return Promise.resolve(); }
+  load() { this.loadCalls += 1; this.error = null; this.paused = true; }
+  play() {
+    if (!this.paused) return Promise.resolve();
+    this.paused = false;
+    this.fire('play');
+    return Promise.resolve();
+  }
   pause() { this.paused = true; this.fire('pause'); }
   fire(name) { this.dispatchEvent(new Event(name)); }
-  ready() { this.fire('loadedmetadata'); }
+  ready() { this.readyState = 4; this.fire('loadedmetadata'); }
 }
 
 class FakePage extends EventTarget {
@@ -326,6 +334,63 @@ test('markUnavailable arrête la lecture et signale l\'indisponibilité', () => 
   engine.markUnavailable();
   assert.equal(audio.paused, true);
   assert.equal(engine.getState().error, 'unavailable');
+});
+
+test('toucher le chapitre en cours de lecture ne déclenche pas de fausse erreur', () => {
+  const { audio, engine, runTimers } = setup();
+  engine.apply(play('c1'));
+  audio.ready();
+  audio.fire('playing');
+  engine.apply({ bookId: 'b', chapterId: 'c1', time: null, play: true });
+  runTimers();
+  assert.equal(engine.getState().error, null);
+  assert.equal(audio.paused, false);
+});
+
+function failedChapter() {
+  const context = setup();
+  context.engine.apply(play('c1', 20));
+  context.audio.ready();
+  context.audio.error = { code: 4 };
+  context.audio.fire('error');
+  return context;
+}
+
+test('relancer après une erreur recharge le chapitre à sa position', () => {
+  const { audio, engine } = failedChapter();
+  engine.toggle();
+  assert.equal(audio.loadCalls, 1);
+  assert.equal(audio.paused, false);
+  audio.ready();
+  assert.equal(audio.currentTime, 20);
+  assert.equal(engine.getState().error, null);
+});
+
+test('toucher à nouveau un chapitre en erreur le recharge', () => {
+  const { audio, engine } = failedChapter();
+  engine.apply({ bookId: 'b', chapterId: 'c1', time: null, play: true });
+  assert.equal(audio.loadCalls, 1);
+  assert.equal(audio.paused, false);
+});
+
+test('déplacer le curseur jusqu\'à la fin ne donne pas d\'étoile', () => {
+  const { audio, engine, store } = setup();
+  engine.apply(play('c1'));
+  audio.ready();
+  engine.seek(100);
+  audio.fire('ended');
+  assert.equal(store.isStarred('b', 'c1'), false);
+  assert.equal(audio.src, 'c2.mp3');
+});
+
+test('revenir en arrière après avoir été au bout rend l\'étoile possible', () => {
+  const { audio, engine, store } = setup();
+  engine.apply(play('c1'));
+  audio.ready();
+  engine.seek(100);
+  engine.seek(10);
+  audio.fire('ended');
+  assert.equal(store.isStarred('b', 'c1'), true);
 });
 
 test('fonctionne sans Media Session', () => {

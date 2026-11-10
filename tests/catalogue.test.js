@@ -154,3 +154,29 @@ test('URL encodées segment par segment', () => {
   assert.equal(catalogue.books[0].id, "l'ours #1");
   assert.equal(ch.id, '01 été.mp3');
 });
+
+test('cleanTitle : un nom uniquement numérique reste affiché', () => {
+  assert.equal(cleanTitle('01.mp3'), '01');
+});
+
+test('TIT2 UTF-16 big-endian de longueur impaire', () => {
+  const text = Buffer.from([0xfe, 0xff, 0x00, 0x41, 0x00]);
+  assert.equal(readId3Title(id3(3, 1, text)), 'A');
+});
+
+test('TIT2 UTF-16BE sans BOM de longueur impaire', () => {
+  assert.equal(readId3Title(id3(4, 2, Buffer.from([0x00, 0x41, 0x00]))), 'A');
+});
+
+test('un dossier nommé comme un MP3 ne casse pas la génération', () => {
+  const root = makeLibrary({ livre: { 'a.mp3': 'x' } });
+  fs.mkdirSync(path.join(root, 'bibliotheque', 'livre', 'b.mp3'));
+  const { catalogue } = buildCatalogue(root, NOW);
+  assert.deepEqual(catalogue.books[0].chapters.map((c) => c.id), ['a.mp3']);
+});
+
+test('extensions d\'image en majuscules reconnues', () => {
+  const { catalogue } = build({ livre: { 'a.mp3': 'x', 'a.JPG': 'i', 'couverture.PNG': 'c' } });
+  assert.equal(catalogue.books[0].cover, 'bibliotheque/livre/couverture.PNG');
+  assert.equal(catalogue.books[0].chapters[0].image, 'bibliotheque/livre/a.JPG');
+});

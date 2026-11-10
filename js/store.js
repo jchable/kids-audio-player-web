@@ -4,9 +4,12 @@
 const PREFIX = 'lecteur.v1.';
 
 export function createStore(storage) {
+  // Simple accès à localStorage : il peut lever une exception selon le navigateur.
+  const access = typeof storage === 'function' ? storage : () => storage;
+
   function read(name, fallback) {
     try {
-      const raw = storage.getItem(PREFIX + name);
+      const raw = access().getItem(PREFIX + name);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
       return fallback;
@@ -15,7 +18,7 @@ export function createStore(storage) {
 
   function write(name, value) {
     try {
-      storage.setItem(PREFIX + name, JSON.stringify(value));
+      access().setItem(PREFIX + name, JSON.stringify(value));
     } catch {
       /* stockage indisponible ou plein */
     }

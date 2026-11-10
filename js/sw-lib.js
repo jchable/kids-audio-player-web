@@ -17,6 +17,25 @@ globalThis.SwLib = {
     return start > end || start >= size ? 'unsatisfiable' : { start, end };
   },
 
+  /* Un seul fichier manquant fait échouer l'installation : l'ancienne version reste en place. */
+  async precache(cache, assets, makeRequest) {
+    await Promise.all(assets.map((asset) => cache.add(makeRequest(asset))));
+  },
+
+  /* Garde le dernier catalogue valide et les couvertures lors d'un changement de version. */
+  async carryOver(caches, targetName, prefix) {
+    const target = await caches.open(targetName);
+    const names = (await caches.keys()).filter((n) => n !== targetName && n.startsWith(prefix));
+    for (const name of names) {
+      const previous = await caches.open(name);
+      for (const request of await previous.keys()) {
+        if (/catalogue\.json$|\/bibliotheque\//.test(request.url) && !(await target.match(request))) {
+          await target.put(request, await previous.match(request));
+        }
+      }
+    }
+  },
+
   isAudioPath(pathname) {
     return /\/bibliotheque\/.+\.mp3$/i.test(pathname);
   },

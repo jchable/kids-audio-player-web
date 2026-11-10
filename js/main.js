@@ -4,6 +4,7 @@ import {
   chapterIndex, findBook, mergeDownloaded, parseCatalogue,
 } from './catalog.js';
 import { installImageFallback } from './dom.js';
+import { createInputGuard } from './input-guard.js';
 import { createOffline } from './offline.js';
 import { next as nextCommand, restoreAtStartup, tapChapter } from './playback.js';
 import { guardPlayerRoute, parseRoute, routeHash } from './router.js';
@@ -19,6 +20,7 @@ import { renderEmptyLibrary, renderLoadFailure } from './views/states.js';
 
 const CATALOGUE_TIMEOUT_MS = 3000;
 const CATALOGUE_RETRY_MS = 10000;
+const SCREEN_CHANGE_HOLD_MS = 400;
 
 const root = document.getElementById('app');
 const nowPlayingRoot = document.getElementById('now-playing');
@@ -32,7 +34,14 @@ let shownNowPlayingKey = null;
 const seenBooks = new Map(); // un livre en écoute reste connu même s'il disparaît du catalogue
 const progress = new Map();
 
-const store = createStore(localStorage);
+const inputGuard = createInputGuard();
+const guarded = (action) => (...args) => { if (inputGuard.allows()) action(...args); };
+const navigating = (action) => guarded((...args) => {
+  inputGuard.hold(SCREEN_CHANGE_HOLD_MS);
+  action(...args);
+});
+
+const store = createStore(() => localStorage);
 const audio = new Audio();
 audio.preload = 'metadata';
 
@@ -86,8 +95,8 @@ function syncNowPlaying(route) {
         book,
         chapter: book.chapters[chapterIndex(book, state.active.chapterId)],
         state,
-        onToggle: engine.toggle,
-        onOpen: () => go(playerRouteFor(engine.getState().active)),
+        onToggle: guarded(engine.toggle),
+        onOpen: navigating(() => go(playerRouteFor(engine.getState().active))),
       });
     }
   }
@@ -103,7 +112,7 @@ function showShelf() {
   renderShelf(root, {
     catalogue,
     isBookAvailable,
-    onOpenBook: (bookId) => go({ name: 'path', bookId }),
+    onOpenBook: navigating((bookId) => go({ name: 'path', bookId })),
   });
 }
 
@@ -169,8 +178,8 @@ function showPath(book, scrollToCurrent) {
     isStarred: store.isStarred,
     isChapterAvailable,
     scrollToCurrent,
-    onHome: () => go({ name: 'shelf' }),
-    onTapChapter: (chapterId) => {
+    onHome: navigating(() => go({ name: 'shelf' })),
+    onTapChapter: navigating((chapterId) => {
       const command = tapChapter({
         book, active: engine.getState().active, saved: store.getPosition(book.id),
       }, chapterId);
@@ -182,7 +191,7 @@ function showPath(book, scrollToCurrent) {
           if (!up && keyOf(engine.getState().active) === keyOf(command)) engine.markUnavailable();
         });
       }
-    },
+    }),
   });
   mountDownload(book);
   syncPath(book);
@@ -196,12 +205,12 @@ function showPlayer(book, route) {
     state: engine.getState(),
     canNext: nextCommand(book, chapter.id) !== null,
     getDuration: () => engine.getState().duration,
-    onToggle: engine.toggle,
-    onPrev: engine.previous,
-    onNext: engine.next,
-    onSeek: engine.seek,
-    onHome: () => go({ name: 'shelf' }),
-    onPath: () => go({ name: 'path', bookId: book.id }),
+    onToggle: guarded(engine.toggle),
+    onPrev: guarded(engine.previous),
+    onNext: guarded(engine.next),
+    onSeek: guarded(engine.seek),
+    onHome: navigating(() => go({ name: 'shelf' })),
+    onPath: navigating(() => go({ name: 'path', bookId: book.id })),
   });
 }
 

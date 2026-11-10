@@ -40,7 +40,6 @@ bibliotheque/
 | Couverture du livre | `couverture.jpg` (ou `.jpeg`, `.png`, `.webp`, `.svg`) | Portrait 3:4 | 900 × 1200 px, moins de 300 Ko |
 | Illustration de chapitre | Nom du MP3, autre extension | Carré | 1000 × 1000 px, moins de 300 Ko |
 
-- Extensions d'image en minuscules : `.JPG` n'est pas reconnu.
 - Gardez le sujet au centre : les images sont recadrées en carré et en rond. La couverture remplace l'illustration d'un chapitre qui n'en a pas.
 - Les espaces et les accents sont acceptés dans les noms de fichiers.
 - Toutes les couvertures sont copiées sur chaque appareil : gardez-les légères.
