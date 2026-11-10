@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+  <rect width="100" height="100" fill="#F2C879"/>
+  <path d="M24 26c10-4 20-3 26 3v49c-6-6-16-7-26-3Z" fill="#fff"/>
+  <path d="M76 26c-10-4-20-3-26 3v49c6-6 16-7 26-3Z" fill="#FFF3DC"/>
+  <path d="M50 29v49" stroke="#B5763A" stroke-width="2"/>
+</svg>
