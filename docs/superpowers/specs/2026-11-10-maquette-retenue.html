@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette retenue</title>
+<style>
+:root{--text-secondary:#666;--border:#ddd;--bg-tertiary:#e8e8ec}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;background:#f5f5f7;color:#1d1d1f;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+h2{font-size:1.6rem;margin:0 0 .5rem}
+h3{font-size:1.1rem;margin:1.2rem 0 .3rem}
+.subtitle{color:var(--text-secondary);margin:0 0 1.2rem}
+.options{display:flex;flex-direction:column;gap:.75rem}
+.option{display:flex;gap:1rem;align-items:flex-start;background:#fff;border:2px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
+.option .letter{background:var(--bg-tertiary);color:var(--text-secondary);width:1.75rem;height:1.75rem;border-radius:6px;display:grid;place-items:center;font-weight:600;flex:none}
+.option .content{flex:1}
+.option .content h3{font-size:.95rem;margin:0 0 .15rem}
+.option .content p{color:var(--text-secondary);font-size:.85rem;margin:0}
+</style>
+</head>
+<body>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+.ks{display:flex;gap:22px;flex-wrap:wrap;margin:14px 0 30px}
+.kw{flex:none;width:208px}
+.ph{width:236px;height:492px;border-radius:34px;background:#1b1b22;padding:7px;box-shadow:0 10px 26px rgba(0,0,0,.28);transform:scale(.88);transform-origin:top left}
+.kw>.ph{margin-bottom:-59px}
+.sc{width:222px;height:478px;border-radius:27px;overflow:hidden;position:relative;font-family:'Fredoka',ui-rounded,'Trebuchet MS',sans-serif;color:#3a2a1c}
+.cap{text-align:center;font-size:12.5px;margin-top:9px;color:var(--text-secondary)}
+.art{display:block;width:100%;height:100%}
+.b{position:absolute;border:0;border-radius:50%;display:grid;place-items:center;padding:0;z-index:3}
+.b svg{width:56%;height:56%;fill:currentColor}
+.t{font-weight:500;line-height:1.15}
+.ctr{position:absolute;left:0;right:0;text-align:center}
+.clip{overflow:hidden;position:absolute}
+.wood{background:#F6E6C8}
+.shelf{position:absolute;left:12px;right:12px;height:150px}
+.bk{position:absolute;bottom:26px;width:88px;height:116px;border-radius:7px 11px 11px 7px;overflow:hidden;box-shadow:3px 4px 7px rgba(80,45,10,.35)}
+.plank{position:absolute;left:-12px;right:-12px;bottom:0;height:26px;background:#B5763A;border-top:4px solid #CF9050;color:#FFF3DC;font-size:11.5px;font-weight:500}
+.plank span{position:absolute;top:4px;width:88px;text-align:center}
+.cont{position:absolute;left:10px;right:10px;bottom:12px;height:74px;background:#fff;border-radius:37px;box-shadow:0 4px 12px rgba(80,45,10,.25)}
+.page{position:absolute;left:24px;top:76px;width:174px;height:174px;background:#fff;padding:7px;border-radius:14px;box-shadow:0 6px 14px rgba(80,45,10,.3);transform:rotate(-1.5deg)}
+.page div{height:100%;border-radius:9px;overflow:hidden}
+.bar{position:absolute;left:24px;right:24px;height:14px;border-radius:7px;background:rgba(80,45,10,.17)}
+.bar u{position:absolute;left:0;top:0;bottom:0;border-radius:7px;background:#F2803A}
+.bar s{position:absolute;top:-7px;width:28px;height:28px;border-radius:50%;background:#fff;border:5px solid #F2803A}
+.grass{background:#D6EFAF}
+.hd{position:absolute;left:0;right:0;top:0;height:76px;background:#D6EFAF;z-index:2}
+.st{position:absolute;width:78px;height:78px;border-radius:50%;overflow:hidden;border:5px solid #fff;box-shadow:0 4px 9px rgba(50,90,20,.33)}
+.st.on{border-color:#F2803A;width:90px;height:90px}
+.n{position:absolute;width:28px;height:28px;border-radius:50%;background:#F2803A;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;border:3px solid #fff}
+.lb{position:absolute;font-size:12.5px;font-weight:500;width:84px;color:#2c4a17;line-height:1.1}
+.star{position:absolute;width:30px;height:30px;color:#FFB400;fill:currentColor;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.tabw{flex:none;width:434px}
+.tabb{width:434px;height:280px}
+.tab{width:620px;height:400px;border-radius:30px;background:#1b1b22;padding:7px;box-shadow:0 12px 30px rgba(0,0,0,.3);transform:scale(.7);transform-origin:top left}
+.tab .sc{width:606px;height:386px;border-radius:23px}
+.tab .bk{width:78px;height:102px}
+.tab .plank span{width:78px}
+.tab .shelf{height:132px}
+</style>
+
+<h2>L'étagère, avec le chemin pour les chapitres</h2>
+<p class="subtitle">Dessins et titres inventés. Les étoiles marquent les chapitres déjà écoutés sur cet appareil.</p>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="ours"><circle cx="-13" cy="-14" r="8" fill="#8A5630"/><circle cx="13" cy="-14" r="8" fill="#8A5630"/><circle cx="-13" cy="-14" r="4" fill="#E9C9A0"/><circle cx="13" cy="-14" r="4" fill="#E9C9A0"/><circle r="20" fill="#9C6137"/><ellipse cy="6" rx="10" ry="8" fill="#E9C9A0"/><circle cx="-7" cy="-4" r="2.4" fill="#2A1A10"/><circle cx="7" cy="-4" r="2.4" fill="#2A1A10"/><ellipse cy="2.5" rx="3.4" ry="2.4" fill="#2A1A10"/><path d="M-4 9q4 3 8 0" stroke="#2A1A10" stroke-width="1.4" fill="none" stroke-linecap="round"/></g>
+<symbol id="foret" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#FFD66B"/><circle cx="78" cy="22" r="12" fill="#FFF3C4"/><path d="M0 62Q30 44 58 60T100 56V100H0Z" fill="#7CBF5B"/><path d="M14 66 26 30 38 66Z" fill="#2F8F5B"/><path d="M68 64 80 34 92 64Z" fill="#3AA06A"/><path d="M0 78Q40 64 100 78V100H0Z" fill="#5DA748"/><use href="#ours" transform="translate(50 70) scale(.95)"/></symbol>
+<symbol id="riviere" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#A8E3F2"/><path d="M0 50Q50 38 100 50V100H0Z" fill="#7CBF5B"/><path d="M32 46Q58 62 34 78T48 100H92Q66 82 86 68T64 46Z" fill="#3FA9E0"/><path d="M58 74q5-3 10 0M50 88q5-3 10 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><use href="#ours" transform="translate(24 66) scale(.8)"/></symbol>
+<symbol id="miel" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#FFE9A8"/><path d="M0 74Q50 62 100 74V100H0Z" fill="#7CBF5B"/><path d="M58 14h24q7 6 9 13 2 7-2 14 3 8 0 15-5 8-12 10H60q-8-3-11-11-2-7 1-14-4-8-1-15 3-8 9-12Z" fill="#F2A52B"/><path d="M50 30h40M48 44h42M52 58h36" stroke="#C97F12" stroke-width="2.5"/><circle cx="70" cy="50" r="5" fill="#5B3A10"/><use href="#ours" transform="translate(28 72) scale(.82)"/></symbol>
+<symbol id="dodo" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#28316B"/><circle cx="74" cy="24" r="13" fill="#FFE9A8"/><circle cx="80" cy="20" r="11" fill="#28316B"/><g fill="#FFE9A8"><circle cx="20" cy="18" r="1.8"/><circle cx="42" cy="30" r="1.4"/><circle cx="58" cy="12" r="1.5"/><circle cx="12" cy="42" r="1.4"/></g><path d="M0 76Q50 62 100 76V100H0Z" fill="#3F5A3A"/><use href="#ours" transform="translate(50 70) scale(.95)"/><path d="M38 60q5 3 9 0M53 60q5 3 9 0" stroke="#2A1A10" stroke-width="2" fill="#9C6137"/></symbol>
+<symbol id="lune" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#3A3F91"/><circle cx="50" cy="42" r="24" fill="#FFE9A8"/><circle cx="42" cy="36" r="4" fill="#EBD07F"/><circle cx="60" cy="50" r="5.5" fill="#EBD07F"/><g fill="#FFE9A8"><path d="m14 18 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/><path d="m86 16 2 4 4 2-4 2-2 4-2-4-4-2 4-2Z"/><circle cx="80" cy="60" r="1.6"/><circle cx="20" cy="58" r="1.6"/></g><path d="M0 82Q50 68 100 82V100H0Z" fill="#232768"/></symbol>
+<symbol id="mer" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#8FE0E8"/><circle cx="20" cy="22" r="11" fill="#FFE68A"/><path d="M0 44q12-7 25 0t25 0 25 0 25 0V100H0Z" fill="#2C8FCB"/><path d="M0 72q12-7 25 0t25 0 25 0 25 0V100H0Z" fill="#1F6FAB"/><path d="M22 62q4-24 34-24 24 0 28 18 8-6 12-10-1 12-11 18-6 14-30 14-30 0-33-16Z" fill="#4A6FB3"/><circle cx="36" cy="55" r="2.8" fill="#14233f"/><path d="M28 64q10 8 24 6" stroke="#14233f" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M58 30q-1-10 5-12M58 30q0-11-6-13" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="ferme" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="#BDE7FF"/><circle cx="80" cy="20" r="11" fill="#FFD84A"/><path d="M0 70Q50 58 100 70V100H0Z" fill="#8CCB5A"/><path d="M18 74V44L36 28l18 16v30Z" fill="#D84A3C"/><path d="M14 46 36 25l22 21" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><rect x="29" y="56" width="14" height="18" fill="#fff"/><circle cx="72" cy="72" r="13" fill="#FFD84A"/><circle cx="68" cy="69" r="1.8" fill="#222"/><circle cx="76" cy="69" r="1.8" fill="#222"/><path d="m69 74 3 4 3-4Z" fill="#F2803A"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.2v15.6a1 1 0 0 0 1.5.86l13-7.8a1 1 0 0 0 0-1.72l-13-7.8A1 1 0 0 0 7 4.2Z"/></symbol>
+<symbol id="i-prev" viewBox="0 0 24 24"><rect x="3" y="4.5" width="3.4" height="15" rx="1.5"/><path d="M21 5.5v13a1 1 0 0 1-1.55.84L9 12.84a1 1 0 0 1 0-1.68l10.45-6.5A1 1 0 0 1 21 5.5Z"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><rect x="17.6" y="4.5" width="3.4" height="15" rx="1.5"/><path d="M3 5.5v13a1 1 0 0 0 1.55.84L15 12.84a1 1 0 0 0 0-1.68L4.55 4.66A1 1 0 0 0 3 5.5Z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M12 2.6 1.8 11.8a.8.8 0 0 0 .54 1.4H4.6v7.3c0 .55.45 1 1 1h4v-6.4h4.8v6.4h4c.55 0 1-.45 1-1v-7.3h2.26a.8.8 0 0 0 .54-1.4Z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 1.8 3 6.5 7.1.8-5.3 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7-5.3-4.8 7.1-.8Z"/></symbol>
+</defs></svg>
+
+<h3>Téléphone</h3>
+<div class="ks">
+
+  <div class="kw"><div class="ph"><div class="sc wood">
+    <div class="shelf" style="top:22px">
+      <div class="bk" style="left:6px"><svg class="art"><use href="#foret"/></svg></div>
+      <div class="bk" style="left:104px"><svg class="art"><use href="#lune"/></svg></div>
+      <div class="plank"><span style="left:18px">Le petit ours</span><span style="left:116px">Bonne nuit</span></div>
+    </div>
+    <div class="shelf" style="top:190px">
+      <div class="bk" style="left:6px"><svg class="art"><use href="#mer"/></svg></div>
+      <div class="bk" style="left:104px"><svg class="art"><use href="#ferme"/></svg></div>
+      <div class="plank"><span style="left:18px">La baleine</span><span style="left:116px">À la ferme</span></div>
+    </div>
+    <div class="cont">
+      <div class="clip" style="left:7px;top:10px;width:54px;height:54px;border-radius:50%"><svg class="art"><use href="#riviere"/></svg></div>
+      <div class="t" style="position:absolute;left:66px;top:19px;font-size:12.5px;width:68px">La rivière<br><span style="opacity:.65;font-size:11px">Le petit ours</span></div>
+      <button class="b" style="right:9px;top:8px;width:58px;height:58px;background:#F2803A;color:#fff"><svg><use href="#i-play"/></svg></button>
+    </div>
+  </div></div><div class="cap">1 · Choisir un livre</div></div>
+
+  <div class="kw"><div class="ph"><div class="sc grass">
+    <svg style="position:absolute;inset:0" width="222" height="478"><path d="M58 122C180 138 190 188 148 224S28 270 60 326s130 40 110 110" fill="none" stroke="#C4A268" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 25"/></svg>
+    <div class="hd"></div>
+    <button class="b" style="left:12px;top:12px;width:54px;height:54px;background:#B5763A;color:#fff"><svg><use href="#i-home"/></svg></button>
+    <div class="ctr t" style="top:30px;left:66px;right:14px;font-size:15px;color:#2c4a17;z-index:3">Le petit ours</div>
+    <div class="st" style="left:16px;top:84px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:9px;top:78px">1</div><svg class="star" style="left:72px;top:78px"><use href="#i-star"/></svg>
+    <div class="lb" style="left:13px;top:167px;text-align:center">La forêt</div>
+    <div class="st on" style="left:112px;top:178px"><svg class="art"><use href="#riviere"/></svg></div><div class="n" style="left:105px;top:172px">2</div>
+    <div class="lb" style="left:18px;top:212px;text-align:right;width:88px">La rivière</div>
+    <div class="st" style="left:20px;top:286px"><svg class="art"><use href="#miel"/></svg></div><div class="n" style="left:13px;top:280px">3</div>
+    <div class="lb" style="left:108px;top:318px">Le miel</div>
+    <div class="st" style="left:128px;top:390px"><svg class="art"><use href="#dodo"/></svg></div><div class="n" style="left:121px;top:384px">4</div>
+    <div class="lb" style="left:40px;top:422px;text-align:right;width:82px">Au dodo</div>
+  </div></div><div class="cap">2 · Le chemin des chapitres</div></div>
+
+  <div class="kw"><div class="ph"><div class="sc grass">
+    <svg style="position:absolute;inset:0" width="222" height="478"><path d="M58 122C180 138 190 188 148 224S28 270 60 326s130 40 110 110" fill="none" stroke="#C4A268" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 25"/></svg>
+    <div class="hd"></div>
+    <button class="b" style="left:12px;top:12px;width:54px;height:54px;background:#B5763A;color:#fff"><svg><use href="#i-home"/></svg></button>
+    <div class="ctr t" style="top:30px;left:66px;right:14px;font-size:15px;color:#2c4a17;z-index:3">Le petit ours</div>
+    <div class="st" style="left:16px;top:84px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:9px;top:78px">5</div><svg class="star" style="left:72px;top:78px"><use href="#i-star"/></svg>
+    <div class="lb" style="left:13px;top:167px;text-align:center">Chapitre 5</div>
+    <div class="st on" style="left:112px;top:178px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:105px;top:172px">6</div>
+    <div class="lb" style="left:18px;top:212px;text-align:right;width:88px">Chapitre 6</div>
+    <div class="st" style="left:20px;top:286px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:13px;top:280px">7</div>
+    <div class="lb" style="left:108px;top:318px">Chapitre 7</div>
+    <div class="st" style="left:128px;top:390px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:121px;top:384px">8</div>
+    <div class="lb" style="left:40px;top:422px;text-align:right;width:82px">Chapitre 8</div>
+  </div></div><div class="cap">2 bis · Livre long, sans dessins<br>(défile, centré sur le chapitre en cours)</div></div>
+
+  <div class="kw"><div class="ph"><div class="sc wood">
+    <button class="b" style="left:12px;top:12px;width:54px;height:54px;background:#B5763A;color:#fff"><svg><use href="#i-home"/></svg></button>
+    <div class="clip" style="right:12px;top:12px;width:54px;height:54px;border-radius:12px;box-shadow:0 2px 6px rgba(80,45,10,.4)"><svg class="art"><use href="#foret"/></svg></div>
+    <div class="page"><div><svg class="art"><use href="#riviere"/></svg></div></div>
+    <div class="ctr t" style="top:268px;font-size:18px;font-weight:600">La rivière</div>
+    <div class="ctr t" style="top:291px;font-size:12.5px;opacity:.7">Le petit ours · chapitre 2</div>
+    <div class="bar" style="top:328px"><u style="width:42%"></u><s style="left:calc(42% - 14px)"></s></div>
+    <button class="b" style="left:7px;top:380px;width:54px;height:54px;background:#fff;color:#B5763A"><svg><use href="#i-prev"/></svg></button>
+    <button class="b" style="left:66px;top:362px;width:90px;height:90px;background:#F2803A;color:#fff;box-shadow:0 5px 12px rgba(160,70,10,.45)"><svg><use href="#i-play"/></svg></button>
+    <button class="b" style="right:7px;top:380px;width:54px;height:54px;background:#fff;color:#B5763A"><svg><use href="#i-next"/></svg></button>
+  </div></div><div class="cap">3 · Écouter</div></div>
+
+</div>
+
+<h3>Tablette</h3>
+<div class="ks">
+
+  <div class="tabw"><div class="tabb"><div class="tab"><div class="sc wood">
+    <div class="shelf" style="top:10px">
+      <div class="bk" style="left:6px"><svg class="art"><use href="#foret"/></svg></div>
+      <div class="bk" style="left:104px"><svg class="art"><use href="#lune"/></svg></div>
+      <div class="bk" style="left:202px"><svg class="art"><use href="#mer"/></svg></div>
+      <div class="bk" style="left:300px"><svg class="art"><use href="#ferme"/></svg></div>
+      <div class="bk" style="left:398px"><svg class="art"><use href="#miel"/></svg></div>
+      <div class="bk" style="left:496px"><svg class="art"><use href="#dodo"/></svg></div>
+      <div class="plank"><span style="left:18px">Le petit ours</span><span style="left:116px">Bonne nuit</span><span style="left:214px">La baleine</span><span style="left:312px">À la ferme</span><span style="left:410px">Les abeilles</span><span style="left:508px">Au lit</span></div>
+    </div>
+    <div class="shelf" style="top:150px">
+      <div class="bk" style="left:6px"><svg class="art"><use href="#riviere"/></svg></div>
+      <div class="plank"><span style="left:18px">La rivière</span></div>
+    </div>
+    <div class="cont" style="left:150px;right:150px;height:74px;bottom:14px">
+      <div class="clip" style="left:7px;top:10px;width:54px;height:54px;border-radius:50%"><svg class="art"><use href="#riviere"/></svg></div>
+      <div class="t" style="position:absolute;left:72px;top:19px;font-size:13.5px;width:120px">La rivière<br><span style="opacity:.65;font-size:12px">Le petit ours</span></div>
+      <button class="b" style="right:9px;top:8px;width:58px;height:58px;background:#F2803A;color:#fff"><svg><use href="#i-play"/></svg></button>
+    </div>
+  </div></div></div><div class="cap">1 · Choisir un livre</div></div>
+
+  <div class="tabw"><div class="tabb"><div class="tab"><div class="sc grass">
+    <svg style="position:absolute;inset:0" width="606" height="386"><path d="M80 134H500Q578 134 578 208T500 282H80" fill="none" stroke="#C4A268" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 25"/></svg>
+    <button class="b" style="left:12px;top:12px;width:54px;height:54px;background:#B5763A;color:#fff"><svg><use href="#i-home"/></svg></button>
+    <div class="ctr t" style="top:30px;font-size:17px;color:#2c4a17">Le petit ours</div>
+    <div class="st" style="left:41px;top:95px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:34px;top:89px">1</div><svg class="star" style="left:97px;top:89px"><use href="#i-star"/></svg><div class="lb" style="left:38px;top:178px;text-align:center">La forêt</div>
+    <div class="st on" style="left:175px;top:89px"><svg class="art"><use href="#riviere"/></svg></div><div class="n" style="left:168px;top:83px">2</div><div class="lb" style="left:178px;top:178px;text-align:center">La rivière</div>
+    <div class="st" style="left:321px;top:95px"><svg class="art"><use href="#miel"/></svg></div><div class="n" style="left:314px;top:89px">3</div><div class="lb" style="left:318px;top:178px;text-align:center">Le miel</div>
+    <div class="st" style="left:461px;top:95px"><svg class="art"><use href="#dodo"/></svg></div><div class="n" style="left:454px;top:89px">4</div><div class="lb" style="left:458px;top:178px;text-align:center">Au dodo</div>
+    <div class="st" style="left:461px;top:243px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:454px;top:237px">5</div><div class="lb" style="left:458px;top:326px;text-align:center">Chapitre 5</div>
+    <div class="st" style="left:321px;top:243px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:314px;top:237px">6</div><div class="lb" style="left:318px;top:326px;text-align:center">Chapitre 6</div>
+    <div class="st" style="left:181px;top:243px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:174px;top:237px">7</div><div class="lb" style="left:178px;top:326px;text-align:center">Chapitre 7</div>
+    <div class="st" style="left:41px;top:243px"><svg class="art"><use href="#foret"/></svg></div><div class="n" style="left:34px;top:237px">8</div><div class="lb" style="left:38px;top:326px;text-align:center">Chapitre 8</div>
+  </div></div></div><div class="cap">2 · Le chemin, en serpentin</div></div>
+
+  <div class="tabw"><div class="tabb"><div class="tab"><div class="sc wood">
+    <button class="b" style="left:12px;top:12px;width:54px;height:54px;background:#B5763A;color:#fff"><svg><use href="#i-home"/></svg></button>
+    <div class="clip" style="right:12px;top:12px;width:54px;height:54px;border-radius:12px;box-shadow:0 2px 6px rgba(80,45,10,.4)"><svg class="art"><use href="#foret"/></svg></div>
+    <div class="page" style="left:44px;top:78px;width:280px;height:280px"><div><svg class="art"><use href="#riviere"/></svg></div></div>
+    <div class="ctr t" style="top:104px;left:350px;right:24px;font-size:24px;font-weight:600">La rivière</div>
+    <div class="ctr t" style="top:138px;left:350px;right:24px;font-size:14.5px;opacity:.7">Le petit ours · chapitre 2</div>
+    <div class="bar" style="top:192px;left:362px;right:36px"><u style="width:42%"></u><s style="left:calc(42% - 14px)"></s></div>
+    <button class="b" style="left:352px;top:262px;width:64px;height:64px;background:#fff;color:#B5763A"><svg><use href="#i-prev"/></svg></button>
+    <button class="b" style="left:428px;top:244px;width:100px;height:100px;background:#F2803A;color:#fff;box-shadow:0 5px 12px rgba(160,70,10,.45)"><svg><use href="#i-play"/></svg></button>
+    <button class="b" style="left:540px;top:262px;width:64px;height:64px;background:#fff;color:#B5763A"><svg><use href="#i-next"/></svg></button>
+  </div></div></div><div class="cap">3 · Écouter</div></div>
+
+</div>
+</body>
+</html>
