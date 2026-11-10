@@ -117,13 +117,18 @@ export function createAudioEngine({
     apply(command);
   }
 
-  function finish(bookId) {
+  function unload() {
     disarmStall();
     active = null;
     playing = false;
     error = null;
+    pendingTime = null;
     audio.removeAttribute('src');
     audio.load();
+  }
+
+  function finish(bookId) {
+    unload();
     store.clearPosition(bookId);
     finishedHandlers.forEach((fn) => fn(bookId));
     notify();
@@ -191,6 +196,11 @@ export function createAudioEngine({
       } else {
         audio.pause();
       }
+      notify();
+    },
+    /* Libère le chapitre sans effacer sa position : le livre peut revenir. */
+    release() {
+      unload();
       notify();
     },
     markUnavailable() {

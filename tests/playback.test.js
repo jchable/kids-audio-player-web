@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  tapChapter, previous, next, onEnded, restoreAtStartup,
+  tapChapter, previous, next, onEnded, restoreAtStartup, shouldRelease,
 } from '../js/playback.js';
 import { parseRoute, routeHash, guardPlayerRoute } from '../js/router.js';
 
@@ -120,4 +120,24 @@ test('guardPlayerRoute : livre inconnu, retour à l\'étagère', () => {
 
 test('guardPlayerRoute : étagère inchangée', () => {
   assert.deepEqual(guardPlayerRoute({ name: 'shelf' }, null, null), { name: 'shelf' });
+});
+
+const withBook = { books: [book] };
+const withoutBook = { books: [{ id: 'autre', chapters: [] }] };
+const restored = { active: { bookId: 'b', chapterId: 'c2' }, playing: false };
+
+test('livre restauré retiré du catalogue : libéré', () => {
+  assert.equal(shouldRelease(restored, withoutBook), true);
+});
+
+test('livre restauré encore au catalogue : gardé', () => {
+  assert.equal(shouldRelease(restored, withBook), false);
+});
+
+test('livre retiré mais en lecture : gardé, l\'écoute n\'est jamais coupée', () => {
+  assert.equal(shouldRelease({ ...restored, playing: true }, withoutBook), false);
+});
+
+test('aucun livre actif : rien à libérer', () => {
+  assert.equal(shouldRelease({ active: null, playing: false }, withoutBook), false);
 });

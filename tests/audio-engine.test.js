@@ -428,3 +428,19 @@ test('fonctionne sans Media Session', () => {
   engine.apply(play('c1'));
   assert.equal(audio.src, 'c1.mp3');
 });
+
+test('release libère le chapitre actif sans effacer la position', () => {
+  const { audio, engine, store } = setup();
+  let finished = false;
+  let notified = 0;
+  engine.onFinished(() => { finished = true; });
+  engine.restore({ bookId: 'b', chapterId: 'c2', time: 30, play: false });
+  engine.subscribe(() => { notified += 1; });
+  engine.release();
+  assert.equal(engine.getState().active, null);
+  assert.equal(engine.getState().playing, false);
+  assert.equal(audio.src, '');
+  assert.deepEqual(store.getPosition('b'), { chapterId: 'c2', time: 30 });
+  assert.equal(finished, false);
+  assert.ok(notified > 0);
+});

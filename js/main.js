@@ -6,7 +6,9 @@ import {
 import { installImageFallback } from './dom.js';
 import { createInputGuard } from './input-guard.js';
 import { createOffline } from './offline.js';
-import { next as nextCommand, restoreAtStartup, tapChapter } from './playback.js';
+import {
+  next as nextCommand, restoreAtStartup, shouldRelease, tapChapter,
+} from './playback.js';
 import { guardPlayerRoute, parseRoute, routeHash } from './router.js';
 import { createStore } from './store.js';
 import { renderDownloadButton } from './views/download-button.js';
@@ -283,11 +285,24 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', async (event) => {
     if (event.data?.type !== 'catalogue-updated') return;
     const updated = await loadCatalogue();
-    if (!updated) return;
-    await offline.reconcile(updated);
-    setCatalogue(updated);
-    if (currentRoute().name !== 'player') render(false);
+    if (updated) await applyCatalogue(updated);
   });
+}
+
+function releaseVanishedBook() {
+  const state = engine.getState();
+  if (!shouldRelease(state, catalogue)) return false;
+  seenBooks.delete(state.active.bookId); // avant release : les écrans ne le retrouvent plus
+  engine.release();
+  return true;
+}
+
+/* L'écran du lecteur n'est redessiné que si son livre a été retiré. */
+async function applyCatalogue(loaded) {
+  await offline.reconcile(loaded);
+  setCatalogue(loaded);
+  const released = releaseVanishedBook();
+  if (released || currentRoute().name !== 'player') render(false);
 }
 
 async function loadCatalogue() {
@@ -309,14 +324,13 @@ async function retryLoadingCatalogue() {
     setTimeout(retryLoadingCatalogue, CATALOGUE_RETRY_MS);
     return;
   }
-  await offline.reconcile(loaded);
-  setCatalogue(loaded);
-  if (currentRoute().name !== 'player') render(false);
+  await applyCatalogue(loaded);
 }
 
 async function restoreLastListening() {
   if (engine.getState().active) return;
-  const lastBook = getBook(store.getLast());
+  // Le catalogue courant, pas seenBooks : un livre retiré entre-temps n'est pas restauré.
+  const lastBook = findBook(catalogue, store.getLast());
   const restored = restoreAtStartup(
     lastBook,
     lastBook ? store.getPosition(lastBook.id) : null,

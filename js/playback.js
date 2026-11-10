@@ -1,5 +1,5 @@
 /* Règles de lecture : que faire quand l'enfant touche quelque chose. Sans accès au DOM. */
-import { chapterIndex } from './catalog.js';
+import { chapterIndex, findBook } from './catalog.js';
 
 const command = (book, chapterId, time, play = true) => ({
   bookId: book.id, chapterId, time, play,
@@ -34,4 +34,10 @@ export function restoreAtStartup(book, saved, isAvailable) {
   if (chapterIndex(book, saved.chapterId) < 0) return null;
   if (!isAvailable(saved.chapterId)) return null;
   return command(book, saved.chapterId, saved.time, false);
+}
+
+/* Un livre restauré depuis un catalogue périmé, puis retiré, ne reste pas affiché.
+   Celui qu'on écoute est gardé : l'écoute de l'enfant n'est jamais coupée. */
+export function shouldRelease({ active, playing }, catalogue) {
+  return Boolean(active) && !playing && !findBook(catalogue, active.bookId);
 }
