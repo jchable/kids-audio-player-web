@@ -1,6 +1,5 @@
-# Démo publique sur GitHub Pages, avec la bibliothèque d'exemple uniquement.
-# Les livres de bibliotheque/ ne sont jamais publiés : le dossier est vidé avant de créer l'exemple.
-name: Démo GitHub Pages
+# Site publié sur GitHub Pages, avec les livres versionnés dans bibliotheque/.
+name: GitHub Pages
 
 on:
   push:
@@ -29,11 +28,8 @@ jobs:
       - name: Tests
         run: npm test
 
-      - name: Bibliothèque de démonstration
-        run: |
-          find bibliotheque -mindepth 1 -maxdepth 1 ! -name .gitkeep -exec rm -rf {} +
-          npm run exemple
-          npm run catalogue
+      - name: Catalogue des livres du dépôt
+        run: npm run catalogue
 
       - name: Assemblage du site
         # Uniquement les fichiers listés dans le README (Hébergement), jamais la racine du dépôt.

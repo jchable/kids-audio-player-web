@@ -1,7 +1,3 @@
-# Livres audio : déposés directement sur le serveur, jamais versionnés
-#bibliotheque/*
-#!bibliotheque/.gitkeep
-
 # Généré à partir de bibliotheque/
 catalogue.json
 

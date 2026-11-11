@@ -4,7 +4,7 @@ Un lecteur web pensé pour un enfant de 3 ans qui ne sait pas lire et l'utilise 
 
 ## Essayer le lecteur
 
-Démo en ligne, avec une bibliothèque d'exemple aux chapitres silencieux : <https://jchable.github.io/kids-audio-player-web/>. Elle est republiée à chaque push sur `main` (`.github/workflows/demo-pages.yml`).
+En ligne, avec les livres versionnés dans `bibliotheque/` : <https://jchable.github.io/kids-audio-player-web/>. Le site est republié à chaque push sur `main` (`.github/workflows/demo-pages.yml`), et son catalogue est généré à partir de ces livres.
 
 Depuis la racine du dépôt, avec Node 22 ou plus récent :
 

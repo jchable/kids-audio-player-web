@@ -21,7 +21,7 @@ Lecteur web de livres audio pour un enfant de 3 ans, non lecteur, qui l'utilise 
 - L'interface doit rester utilisable sans savoir lire, mais le titre du livre et du chapitre est toujours affiché.
 - Cibles tactiles d'au moins 72 px (attribut `data-target`).
 - Textes de l'interface et commentaires en français.
-- `bibliotheque/` et `catalogue.json` ne sont jamais versionnés.
+- Les livres de `bibliotheque/` sont versionnés et publiés sur GitHub Pages. `catalogue.json` n'est jamais versionné : le déploiement le génère.
 - `navigator.onLine` n'est jamais une source de vérité : un téléphone en 4G est « en ligne » sans joindre le serveur de la maison.
 - Le mode hors-ligne exige un contexte sécurisé : le tester sur `localhost` ou en HTTPS, pas sur une adresse locale en HTTP.
 - ⚠ Toute modification d'un fichier du shell (`index.html`, `css/`, `js/`, `fonts/`, `icons/`, `img/`, manifeste) impose d'incrémenter `SHELL_CACHE` dans `sw.js`. Un nouveau fichier JS doit aussi être ajouté à `SHELL_ASSETS`. Ne jamais renommer `AUDIO_CACHE`.
