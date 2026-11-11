@@ -45,6 +45,16 @@ const navigating = (action) => guarded((...args) => {
 });
 
 const store = createStore(() => localStorage);
+
+/* Couleur de la barre du système, assortie au haut des écrans. */
+const THEME_COLORS = { jour: '#BFE6F2', nuit: '#1B2050' };
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme]);
+}
+applyTheme(store.getTheme());
+
 const audio = new Audio();
 audio.preload = 'metadata';
 
@@ -116,6 +126,13 @@ function showShelf() {
     catalogue,
     isBookAvailable,
     onOpenBook: navigating((bookId) => go({ name: 'path', bookId })),
+    night: store.getTheme() === 'nuit',
+    onToggleTheme: guarded(() => {
+      const theme = store.getTheme() === 'nuit' ? 'jour' : 'nuit';
+      store.setTheme(theme);
+      applyTheme(theme);
+      showShelf();
+    }),
   });
 }
 

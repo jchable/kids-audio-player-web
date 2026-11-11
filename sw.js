@@ -1,7 +1,7 @@
 /* Service worker : application disponible hors-ligne, audio servi depuis les téléchargements. */
 importScripts('js/sw-lib.js');
 
-const SHELL_CACHE = 'lecteur-shell-v4';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
+const SHELL_CACHE = 'lecteur-shell-v5';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
 const AUDIO_CACHE = 'lecteur-audio-v1';  // Ne jamais renommer : contient les téléchargements
 
 const {

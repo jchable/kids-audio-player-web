@@ -1,7 +1,8 @@
-/* Mémoire locale de l'appareil : positions, étoiles, dernier livre écouté.
+/* Mémoire locale de l'appareil : positions, étoiles, dernier livre écouté, thème.
    Si le stockage est indisponible, l'application continue, sans mémoire. */
 
 const PREFIX = 'lecteur.v1.';
+export const THEMES = ['jour', 'nuit']; // le premier est le thème par défaut
 
 export function createStore(storage) {
   // Simple accès à localStorage : il peut lever une exception selon le navigateur.
@@ -49,6 +50,12 @@ export function createStore(storage) {
     },
     setLast(bookId) {
       write('last', bookId);
+    },
+    getTheme() {
+      return THEMES.includes(read('theme', null)) ? read('theme', null) : THEMES[0];
+    },
+    setTheme(theme) {
+      write('theme', theme);
     },
   };
 }

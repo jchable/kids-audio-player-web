@@ -6,18 +6,81 @@
   src: url('../fonts/fredoka.woff2') format('woff2');
 }
 
+/* ----- Thème jour (papier découpé), par défaut ----- */
 :root {
-  --wood: #B5763A;
-  --wood-light: #CF9050;
-  --wall: #F6E6C8;
-  --grass: #D6EFAF;
-  --grass-ink: #2C4A17;
+  --paper: #FDF1D8;
+  --sky: #BFE6F2;
+  --meadow: #B6DD8B;
+  --heading: #24506B;
   --ink: #3A2A1C;
-  --orange: #F2803A;
-  --white: #FFFFFF;
+  --ink-soft: #6B5642;
+  --card: #FFFFFF;
+  --card-ink: #3A2A1C;
+  --accent: #EF6A4C;
+  --on-accent: #FFFFFF;
+  --accent-depth: #B9432C;
+  --home: #FFC94D;
+  --home-ink: #3A2A1C;
+  --home-depth: #D89E1F;
+  --secondary-depth: #E2D2B0;
+  --plank: #DDA463;
+  --plank-top: #EEC084;
+  --plank-bottom: #B47A3C;
+  --plank-ink: #3A2A1C;
+  --step-border: #FFFFFF;
+  --badge: #3A2A1C;
+  --badge-ink: #FFFFFF;
+  --road: #F8E6BC;
+  --road-edge: rgba(138, 106, 50, .22);
+  --road-dash: #D2AE6C;
+  --road-dash-width: 4;
+  --star: #FFC21A;
+  --star-edge: #FFFFFF;
+  --track: rgba(58, 42, 28, .14);
+  --handle: #FFFFFF;
+  --shadow: rgba(80, 45, 10, .3);
+  --success: #2F8F5B;
+  --warning: #FFB400;
+  --danger: #E8483F;
   --plank-height: 44px;
   --row-height: 272px;
-  --now-playing-height: 104px;
+  --now-playing-height: 112px;
+}
+
+/* ----- Thème nuit (veilleuse) ----- */
+:root[data-theme='nuit'] {
+  --paper: #1B2050;
+  --sky: #1B2050;
+  --meadow: #1B2050;
+  --heading: #FFF6DC;
+  --ink: #FFF6DC;
+  --ink-soft: #C9CCF5;
+  --card: #2F3682;
+  --card-ink: #FFF6DC;
+  --accent: #FFB55C;
+  --on-accent: #1B2050;
+  --accent-depth: #C9803A;
+  --home: #D9DBFA;
+  --home-ink: #1B2050;
+  --home-depth: #8E93DB;
+  --secondary-depth: #12163D;
+  --plank: #D9DBFA;
+  --plank-top: #D9DBFA;
+  --plank-bottom: #AEB2EC;
+  --plank-ink: #1B2050;
+  --step-border: #D9DBFA;
+  --badge: #FFF6DC;
+  --badge-ink: #1B2050;
+  --road: transparent;
+  --road-edge: transparent;
+  --road-dash: rgba(255, 246, 220, .6);
+  --road-dash-width: 7;
+  --star: #FFE39A;
+  --star-edge: #1B2050;
+  --track: rgba(255, 255, 255, .18);
+  --handle: #FFE39A;
+  --shadow: rgba(0, 0, 0, .45);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -25,13 +88,22 @@
 html, body { margin: 0; min-height: 100%; }
 
 body {
-  background: var(--wall);
+  background: var(--paper);
   color: var(--ink);
   font-family: 'Fredoka', ui-rounded, 'Trebuchet MS', sans-serif;
   font-weight: 500;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+}
+
+/* Ciel étoilé, derrière tous les écrans de nuit. */
+[data-theme='nuit'] body {
+  background:
+    radial-gradient(circle at 23px 31px, rgba(255, 246, 220, .75) 1.6px, transparent 2.2px) 0 0 / 137px 151px,
+    radial-gradient(circle at 71px 93px, rgba(255, 246, 220, .5) 1.1px, transparent 1.7px) 0 0 / 89px 113px,
+    var(--paper);
+  background-attachment: fixed;
 }
 
 button { font: inherit; color: inherit; border: 0; padding: 0; background: none; cursor: pointer; }
@@ -53,21 +125,105 @@ img { display: block; }
 
 body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env(safe-area-inset-bottom)); }
 
+/* Bouton maison, commun au chemin et au lecteur. */
+.home {
+  background: var(--home);
+  color: var(--home-ink);
+  box-shadow: 0 5px 0 var(--home-depth), 0 10px 14px rgba(80, 45, 10, .2);
+}
+
 /* ----- Étagère ----- */
+.shelf-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(14px + env(safe-area-inset-top)) 16px 14px 20px;
+  background: var(--sky);
+}
+
+/* Bord festonné du bandeau, comme découpé aux ciseaux. */
+.shelf-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 1;
+  height: 16px;
+  background: radial-gradient(circle at 16px 0, var(--sky) 15.5px, transparent 16px) 0 0 / 32px 16px repeat-x;
+  pointer-events: none;
+}
+
+.shelf-decor {
+  position: absolute;
+  right: 96px;
+  top: calc(4px + env(safe-area-inset-top));
+  width: 170px;
+  height: 90px;
+  pointer-events: none;
+}
+
+.decor-night { display: none; }
+[data-theme='nuit'] .decor-day { display: none; }
+[data-theme='nuit'] .decor-night { display: inline; }
+
+.shelf-heading {
+  position: relative;
+  flex: 1;
+  margin: 0;
+  color: var(--heading);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.theme-toggle {
+  position: relative;
+  background: #FFE39A;
+  color: #C96A00;
+  box-shadow: 0 0 0 8px rgba(255, 201, 77, .4);
+}
+
+.theme-toggle .icon { width: 64%; height: 64%; }
+
+[data-theme='nuit'] .theme-toggle {
+  background: #2F3682;
+  color: #FFE39A;
+  box-shadow: 0 0 0 8px rgba(255, 227, 154, .14), 0 0 26px rgba(255, 227, 154, .35);
+}
+
 .shelf {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
   grid-auto-rows: var(--row-height);
-  padding: calc(16px + env(safe-area-inset-top)) 8px 16px;
-  min-height: 100vh;
-  min-height: 100dvh;
+  padding: 16px 8px;
+  min-height: calc(100vh - 100px);
+  min-height: calc(100dvh - 100px);
+  /* Planches : un rebord clair, le plateau, une tranche foncée. */
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0 calc(var(--row-height) - var(--plank-height)),
-    var(--wood-light) calc(var(--row-height) - var(--plank-height)) calc(var(--row-height) - var(--plank-height) + 4px),
-    var(--wood) calc(var(--row-height) - var(--plank-height) + 4px) var(--row-height)
+    var(--plank-top) calc(var(--row-height) - var(--plank-height)) calc(var(--row-height) - var(--plank-height) + 6px),
+    var(--plank) calc(var(--row-height) - var(--plank-height) + 6px) calc(var(--row-height) - 7px),
+    var(--plank-bottom) calc(var(--row-height) - 7px) var(--row-height)
   );
-  background-position: 0 calc(16px + env(safe-area-inset-top));
+  background-position: 0 16px;
+}
+
+/* La nuit, les livres sont posés sur des nuages : des bosses au-dessus de chaque planche. */
+[data-theme='nuit'] .shelf {
+  background-image:
+    /* Centre placé pour que la bosse reste dans sa tuile : sinon elle dépasse en haut de l'étagère. */
+    radial-gradient(circle at 37px calc(var(--row-height) - var(--plank-height) + 5px), var(--plank) 22px, transparent 22.5px),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(var(--row-height) - var(--plank-height)),
+      var(--plank) calc(var(--row-height) - var(--plank-height)) calc(var(--row-height) - 7px),
+      var(--plank-bottom) calc(var(--row-height) - 7px) var(--row-height)
+    );
+  background-size: 74px var(--row-height), auto;
+  background-position: 0 16px, 0 16px;
 }
 
 .book {
@@ -78,25 +234,52 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 }
 
 .book-cover {
+  position: relative;
   width: min(148px, calc(100% - 16px));
   height: 200px;
-  border-radius: 8px 12px 12px 8px;
+  border-radius: 8px 16px 16px 8px;
   overflow: hidden;
-  box-shadow: 3px 4px 8px rgba(80, 45, 10, .35);
+  background: var(--card);
+  box-shadow: 5px 8px 14px rgba(80, 45, 10, .32);
+  transform-origin: bottom center;
 }
+
+/* Dos du livre. */
+.book-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 11px;
+  background: rgba(58, 42, 28, .17);
+}
+
+/* Livres légèrement de travers, comme posés à la main. */
+.book:nth-child(3n + 1) .book-cover { rotate: -2deg; }
+.book:nth-child(3n + 2) .book-cover { rotate: 1.5deg; }
+.book:nth-child(3n) .book-cover { rotate: -1deg; }
+
+[data-theme='nuit'] .book-cover {
+  border: 4px solid #FFF6DC;
+  border-radius: 18px;
+  rotate: none;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .45);
+}
+
+[data-theme='nuit'] .book-cover::after { display: none; }
 
 .book-cover img { width: 100%; height: 100%; object-fit: cover; }
 
 .book-title {
   height: var(--plank-height);
   width: 100%;
-  padding: 4px 6px 0;
+  padding: 6px 6px 0;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #FFF3DC;
-  font-size: 15px;
+  color: var(--plank-ink);
+  font-size: 16px;
+  font-weight: 600;
   line-height: 1.05;
   overflow: hidden;
 }
@@ -104,7 +287,19 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 .book[aria-disabled='true'] .book-cover { filter: grayscale(1); opacity: .55; }
 
 /* ----- Chemin des chapitres ----- */
-.path-view { min-height: 100vh; min-height: 100dvh; background: var(--grass); color: var(--grass-ink); }
+.path-view {
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--ink);
+  /* Prairie semée de petites fleurs. */
+  background:
+    radial-gradient(circle at 30px 40px, #FFFFFF 3.5px, transparent 4px) 0 0 / 143px 171px,
+    radial-gradient(circle at 30px 40px, #FFC94D 1.6px, transparent 2px) 0 0 / 143px 171px,
+    radial-gradient(circle at 96px 118px, #FF9DB5 3px, transparent 3.5px) 0 0 / 127px 157px,
+    var(--meadow);
+}
+
+[data-theme='nuit'] .path-view { background: transparent; }
 
 .path-header {
   position: sticky;
@@ -112,35 +307,57 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
-  background: var(--grass);
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+  background: var(--sky);
 }
 
-.home { background: var(--wood); color: var(--white); }
+.path-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 16px;
+  background: radial-gradient(circle at 16px 0, var(--sky) 15.5px, transparent 16px) 0 0 / 32px 16px repeat-x;
+  pointer-events: none;
+}
 
 .path-title {
   flex: 1;
+  min-width: 0;
   margin: 0;
+  padding: 10px 8px;
+  border-radius: 18px;
+  background: var(--card);
+  color: var(--card-ink);
+  box-shadow: 0 5px 12px rgba(80, 45, 10, .2);
+  rotate: -1.5deg;
   text-align: center;
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 21px;
+  font-weight: 600;
   line-height: 1.1;
 }
 
+[data-theme='nuit'] .path-header::after,
+[data-theme='nuit'] .shelf-header::after { display: none; }
+
+[data-theme='nuit'] .path-title { background: none; box-shadow: none; rotate: none; font-size: 24px; }
+
 .path-action { width: 72px; flex: none; display: grid; place-items: center; }
 
-.path-map { position: relative; touch-action: pan-y; }
+/* Marge haute : place pour le halo de l'étape en cours, que l'en-tête et son feston couperaient sinon. */
+.path-map { position: relative; margin-top: 28px; touch-action: pan-y; }
 
 .path-line { position: absolute; inset: 0; }
 
-.path-line path {
-  fill: none;
-  stroke: #C4A268;
-  stroke-width: 16;
-  stroke-linecap: round;
-  stroke-dasharray: 1 26;
-}
+.path-line path { fill: none; stroke-linecap: round; }
+
+.path-line .road-edge { stroke: var(--road-edge); stroke-width: 30; translate: 0 4px; }
+
+.path-line .road { stroke: var(--road); stroke-width: 28; }
+
+.path-line .road-dash { stroke: var(--road-dash); stroke-width: var(--road-dash-width); stroke-dasharray: 2 16; }
 
 .step { position: absolute; width: 112px; height: 112px; }
 
@@ -150,60 +367,95 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  border: 6px solid var(--white);
-  box-shadow: 0 4px 10px rgba(50, 90, 20, .33);
+  background: var(--card);
+  border: 6px solid var(--step-border);
+  box-shadow: 0 7px 14px rgba(50, 80, 20, .38);
   transition: transform .15s;
 }
 
+[data-theme='nuit'] .step-image { box-shadow: 0 8px 20px rgba(0, 0, 0, .5); }
+
 .step-image img { width: 100%; height: 100%; object-fit: cover; }
 
-.step.current .step-image { border-color: var(--orange); transform: scale(1.14); }
+.step.current .step-image {
+  border: 8px solid var(--accent);
+  transform: scale(1.14);
+  box-shadow: 0 0 0 9px rgba(255, 255, 255, .6), 0 10px 18px rgba(50, 80, 20, .4);
+}
+
+[data-theme='nuit'] .step.current .step-image {
+  box-shadow: 0 0 0 10px rgba(255, 227, 154, .18), 0 0 46px rgba(255, 227, 154, .55);
+}
 
 .step-number {
   position: absolute;
-  top: -4px;
-  left: -4px;
-  width: 36px;
-  height: 36px;
+  z-index: 1;
+  top: -6px;
+  left: -6px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 3px solid var(--white);
-  background: var(--orange);
-  color: var(--white);
-  font-size: 18px;
+  border: 3px solid var(--step-border);
+  background: var(--badge);
+  color: var(--badge-ink);
+  font-size: 19px;
   font-weight: 700;
 }
 
+[data-theme='nuit'] .step-number { border-color: var(--paper); }
+
+.step.current .step-number { background: var(--accent); color: var(--on-accent); }
+
 .step-star {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 44px;
-  height: 44px;
+  z-index: 1;
+  top: -14px;
+  right: -14px;
+  width: 50px;
+  height: 50px;
   display: none;
   place-items: center;
-  color: #FFB400;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35));
+  color: var(--star);
+  filter: drop-shadow(0 3px 2px rgba(80, 45, 10, .35));
 }
 
-.step-star .icon { width: 100%; height: 100%; }
+[data-theme='nuit'] .step-star { filter: drop-shadow(0 0 7px rgba(255, 227, 154, .9)); }
+
+.step-star .icon {
+  width: 100%;
+  height: 100%;
+  stroke: var(--star-edge);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
 
 .step.starred .step-star { display: grid; }
 
 .step-title {
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + 14px);
   left: 50%;
-  transform: translateX(-50%);
-  width: 148px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  background: var(--grass);
+  translate: -50% 0;
+  max-width: 160px;
+  width: max-content;
+  padding: 4px 12px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--card-ink);
+  box-shadow: 0 3px 8px rgba(50, 80, 20, .22);
   text-align: center;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.1;
 }
+
+.step:nth-of-type(odd) .step-title { rotate: 2deg; }
+.step:nth-of-type(even) .step-title { rotate: -2deg; }
+.step.current .step-title { font-weight: 600; }
+
+[data-theme='nuit'] .step-title { background: rgba(27, 32, 80, .78); box-shadow: none; rotate: none; }
 
 .step[aria-disabled='true'] .step-image { filter: grayscale(1); opacity: .55; }
 
@@ -211,11 +463,17 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 .player {
   min-height: 100vh;
   min-height: 100dvh;
-  padding: calc(8px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
   gap: 8px;
+  /* Un pan de ciel découpé derrière l'image. */
+  background: radial-gradient(150% 50% at 50% 0, var(--sky) 99.4%, transparent 100%) no-repeat, var(--paper);
+}
+
+[data-theme='nuit'] .player {
+  background: radial-gradient(circle at 50% 32%, rgba(255, 227, 154, .1), transparent 62%);
 }
 
 .player-top { display: flex; justify-content: space-between; align-items: center; grid-column: 1 / -1; }
@@ -223,42 +481,75 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 .book-thumb {
   width: 72px;
   height: 72px;
-  border-radius: 14px;
+  border: 5px solid var(--card);
+  border-radius: 10px 18px 18px 10px;
   overflow: hidden;
-  box-shadow: 0 2px 7px rgba(80, 45, 10, .4);
+  background: var(--card);
+  box-shadow: 4px 7px 12px var(--shadow);
+  rotate: 4deg;
 }
+
+[data-theme='nuit'] .book-thumb { border: 4px solid #FFF6DC; border-radius: 20px; rotate: none; }
 
 .book-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-.player-art { display: grid; place-items: center; min-height: 0; }
+.player-art { display: grid; place-items: center; min-height: 0; padding: 12px 0; }
 
 .player-page {
-  width: min(76vw, 44vh);
+  position: relative;
+  width: min(76vw, 42vh);
   aspect-ratio: 1;
-  background: var(--white);
-  padding: 10px;
-  border-radius: 18px;
-  box-shadow: 0 6px 16px rgba(80, 45, 10, .3);
-  transform: rotate(-1.5deg);
+  background: var(--card);
+  padding: 12px;
+  border-radius: 26px;
+  box-shadow: 0 12px 26px rgba(80, 45, 10, .3);
+  rotate: -2deg;
 }
 
-.player-page img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+/* Deux bouts de ruban adhésif qui tiennent l'image. */
+.player-page::before,
+.player-page::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  width: 84px;
+  height: 26px;
+}
+
+.player-page::before { left: -22px; rotate: -38deg; background: rgba(255, 201, 77, .85); }
+.player-page::after { right: -22px; rotate: 38deg; background: rgba(239, 106, 76, .7); }
+
+.player-page img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+
+[data-theme='nuit'] .player-page {
+  padding: 0;
+  border: 6px solid #FFF6DC;
+  border-radius: 46px;
+  overflow: hidden;
+  rotate: none;
+  box-shadow: 0 0 0 10px rgba(255, 227, 154, .14), 0 0 60px rgba(255, 227, 154, .4), 0 18px 34px rgba(0, 0, 0, .45);
+}
+
+[data-theme='nuit'] .player-page::before,
+[data-theme='nuit'] .player-page::after { display: none; }
+
+[data-theme='nuit'] .player-page img { border-radius: 0; }
 
 .player-info { display: flex; flex-direction: column; align-items: stretch; text-align: center; }
 
-.player-title { margin: 0; font-size: 26px; font-weight: 600; line-height: 1.1; }
+.player-title { margin: 0; font-size: 32px; font-weight: 600; line-height: 1.1; }
 
-.player-book { margin: 4px 0 0; font-size: 16px; opacity: .72; }
+.player-book { margin: 6px 0 0; font-size: 17px; color: var(--ink-soft); }
 
 .progress {
   position: relative;
-  height: 14px;
-  margin: 30px 20px 30px;
-  border-radius: 7px;
-  background: rgba(80, 45, 10, .17);
+  height: 18px;
+  margin: 34px 20px;
+  border-radius: 9px;
+  background: var(--track);
 }
 
-.progress-fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 7px; background: var(--orange); }
+.progress-fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 9px; background: var(--accent); }
 
 .progress-handle {
   position: absolute;
@@ -274,69 +565,98 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 }
 
 .progress-handle span {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--white);
-  border: 6px solid var(--orange);
+  background: var(--handle);
+  border: 7px solid var(--accent);
+  box-shadow: 0 5px 10px rgba(80, 45, 10, .3);
 }
 
-.controls { display: flex; align-items: center; justify-content: center; gap: 14px; }
+[data-theme='nuit'] .progress-handle span {
+  border: 0;
+  box-shadow: 0 0 0 6px rgba(255, 227, 154, .2), 0 0 22px rgba(255, 227, 154, .6);
+}
 
-.secondary { background: var(--white); color: var(--wood); }
+.controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
+
+.secondary {
+  width: 80px;
+  height: 80px;
+  background: var(--card);
+  color: var(--card-ink);
+  box-shadow: 0 5px 0 var(--secondary-depth), 0 10px 14px rgba(80, 45, 10, .2);
+}
+
+[data-theme='nuit'] .secondary { box-shadow: inset 0 0 0 2px #5A63C8; }
 
 .secondary[aria-disabled='true'] { opacity: .35; }
 
 .toggle {
-  width: 108px;
-  height: 108px;
-  background: var(--orange);
-  color: var(--white);
-  box-shadow: 0 5px 12px rgba(160, 70, 10, .45);
+  width: 120px;
+  height: 120px;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 0 var(--accent-depth), 0 18px 24px rgba(160, 70, 10, .3);
+}
+
+[data-theme='nuit'] .toggle {
+  box-shadow: 0 0 0 10px rgba(255, 227, 154, .16), 0 0 50px rgba(255, 200, 120, .5);
 }
 
 @media (min-width: 600px) {
-  .player { grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; column-gap: 32px; }
-  .player-page { width: min(42vw, 68vh); }
+  .player {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 32px;
+    background: radial-gradient(70% 90% at 0 50%, var(--sky) 99.4%, transparent 100%) no-repeat, var(--paper);
+  }
+  .player-page { width: min(40vw, 64vh); }
   .player-info { justify-content: center; }
-  .player-title { font-size: 34px; }
+  .player-title { font-size: 38px; }
 }
 
 /* ----- Écoute en cours ----- */
 .now-bar {
   position: fixed;
-  left: 10px;
-  right: 10px;
-  bottom: calc(10px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 10;
   max-width: 520px;
   margin: 0 auto;
-  height: 88px;
+  height: 96px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  background: var(--white);
-  color: var(--ink);
-  border-radius: 44px;
-  box-shadow: 0 4px 14px rgba(80, 45, 10, .3);
+  gap: 10px;
+  padding: 12px;
+  background: var(--card);
+  color: var(--card-ink);
+  border-radius: 48px;
+  box-shadow: 0 8px 22px var(--shadow);
 }
 
-.now-open { flex: 1; min-width: 0; height: 72px; display: flex; align-items: center; gap: 10px; text-align: left; }
+[data-theme='nuit'] .now-bar { box-shadow: inset 0 0 0 2px #5A63C8, 0 10px 26px rgba(0, 0, 0, .5); }
+
+.now-open { flex: 1; min-width: 0; height: 72px; display: flex; align-items: center; gap: 12px; text-align: left; }
 
 .now-image { width: 72px; height: 72px; flex: none; border-radius: 50%; overflow: hidden; }
 
+[data-theme='nuit'] .now-image { border: 3px solid #FFF6DC; }
+
 .now-image img { width: 100%; height: 100%; object-fit: cover; }
 
-.now-text { min-width: 0; display: flex; flex-direction: column; }
+.now-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 
 .now-title, .now-book { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.now-title { font-size: 17px; }
+.now-title { font-size: 20px; font-weight: 600; line-height: 1.1; }
 
-.now-book { font-size: 14px; opacity: .65; }
+.now-book { font-size: 15px; color: var(--ink-soft); }
 
-.now-toggle { background: var(--orange); color: var(--white); }
+.now-toggle { background: var(--accent); color: var(--on-accent); box-shadow: 0 5px 0 var(--accent-depth); }
+
+[data-theme='nuit'] .now-toggle { box-shadow: 0 0 0 6px rgba(255, 227, 154, .16); }
 
 /* ----- Erreurs et états vides ----- */
 @keyframes shake {
@@ -347,9 +667,9 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 
 .has-error .player-page { filter: grayscale(1); animation: shake .5s 2; }
 
-.has-error .toggle { background: #FFB400; color: var(--ink); }
+.has-error .toggle { background: var(--warning); color: #3A2A1C; }
 
-.step.failed .step-image { filter: grayscale(1); border-color: #E8483F; animation: shake .5s 2; }
+.step.failed .step-image { filter: grayscale(1); border-color: var(--danger); animation: shake .5s 2; }
 
 .state {
   min-height: 100vh;
@@ -365,14 +685,16 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 
 .state svg { width: min(70vw, 340px); }
 
-.state p { margin: 0; font-size: 18px; opacity: .7; }
+.state p { margin: 0; font-size: 18px; color: var(--ink-soft); }
 
 /* ----- Téléchargement ----- */
-.download { background: var(--white); color: var(--grass-ink); }
+.download { background: var(--card); color: var(--success); box-shadow: 0 5px 12px rgba(80, 45, 10, .2); }
 
-.download[data-status='downloaded'] { background: #3FA24A; color: var(--white); }
+[data-theme='nuit'] .download { color: var(--card-ink); box-shadow: inset 0 0 0 2px #5A63C8; }
 
-.download[data-status='failed'], .download[data-status='update'] { background: #FFB400; color: var(--ink); }
+.download[data-status='downloaded'] { background: var(--success); color: #FFFFFF; }
+
+.download[data-status='failed'], .download[data-status='update'] { background: var(--warning); color: #3A2A1C; }
 
 .downloading {
   width: 72px;
@@ -380,10 +702,10 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: conic-gradient(#3FA24A var(--progress), var(--white) 0);
+  background: conic-gradient(var(--success) var(--progress), var(--card) 0);
 }
 
-.downloading span { width: 48px; height: 48px; border-radius: 50%; background: var(--grass); }
+.downloading span { width: 48px; height: 48px; border-radius: 50%; background: var(--sky); }
 
 .confirm {
   position: fixed;
@@ -394,8 +716,8 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
   background: rgba(30, 20, 10, .55);
 }
 
-.confirm-box { display: flex; gap: 40px; padding: 32px; border-radius: 32px; background: var(--white); }
+.confirm-box { display: flex; gap: 40px; padding: 32px; border-radius: 32px; background: var(--card); }
 
-.confirm-back { background: var(--grass); color: var(--grass-ink); width: 96px; height: 96px; }
+.confirm-back { background: var(--home); color: var(--home-ink); width: 96px; height: 96px; }
 
-.confirm-delete { background: #E8483F; color: var(--white); width: 96px; height: 96px; }
+.confirm-delete { background: var(--danger); color: #FFFFFF; width: 96px; height: 96px; }

@@ -39,8 +39,9 @@ export function renderPath(root, {
   const map = root.querySelector('.path-map');
   const { points, height } = pathLayout(book.chapters.length, map.clientWidth);
   map.style.height = `${height}px`;
+  const d = pathD(points);
   map.innerHTML = `<svg class="path-line" width="100%" height="${height}" aria-hidden="true">
-      <path d="${pathD(points)}"/></svg>
+      <path class="road-edge" d="${d}"/><path class="road" d="${d}"/><path class="road-dash" d="${d}"/></svg>
     ${book.chapters.map((chapter, i) => stepHtml(book, chapter, i, points[i], isChapterAvailable(book, chapter.id))).join('')}`;
 
   root.querySelector('.home').addEventListener('click', onHome);

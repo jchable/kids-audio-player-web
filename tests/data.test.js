@@ -97,6 +97,16 @@ test('getLast et setLast', () => {
   assert.equal(s.getLast(), 'a');
 });
 
+test('thème : jour par défaut, nuit mémorisée, valeur inconnue ignorée', () => {
+  const storage = memoryStorage();
+  const s = createStore(storage);
+  assert.equal(s.getTheme(), 'jour');
+  s.setTheme('nuit');
+  assert.equal(s.getTheme(), 'nuit');
+  storage.setItem('lecteur.v1.theme', '"violet"');
+  assert.equal(s.getTheme(), 'jour');
+});
+
 test('une donnée corrompue est ignorée', () => {
   const storage = memoryStorage();
   const s = createStore(storage);
