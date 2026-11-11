@@ -658,6 +658,76 @@ body.has-now-playing #app { padding-bottom: calc(var(--now-playing-height) + env
 
 [data-theme='nuit'] .now-toggle { box-shadow: 0 0 0 6px rgba(255, 227, 154, .16); }
 
+/* ----- Chargement ----- */
+.loading {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  /* Montré seulement si le chargement dure : pas de flash quand le catalogue arrive vite. */
+  animation: loading-appear .4s .25s both;
+}
+
+.loading-scene { width: min(62vw, 260px); overflow: visible; }
+
+.loading-disc { fill: var(--sky); }
+[data-theme='nuit'] .loading-disc { fill: var(--card); }
+
+.loading-shadow { fill: rgba(58, 42, 28, .16); transform-box: fill-box; transform-origin: center; animation: loading-shadow 1.2s ease-in-out infinite; }
+[data-theme='nuit'] .loading-shadow { fill: rgba(0, 0, 0, .35); }
+
+.loading-bear { animation: loading-bob 1.2s ease-in-out infinite; }
+
+.loading-note { fill: var(--accent); opacity: 0; animation: loading-note 2.4s ease-out infinite; }
+g:nth-of-type(2) > .loading-note { animation-delay: .8s; }
+g:nth-of-type(3) > .loading-note { animation-delay: 1.6s; }
+
+.loading-dots { display: flex; gap: 12px; }
+
+.loading-dots span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: loading-dot 1.2s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes loading-appear { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes loading-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes loading-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 1; }
+  50% { transform: scaleX(.78); opacity: .6; }
+}
+
+@keyframes loading-note {
+  0% { opacity: 0; transform: translate(0, 10px); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(8px, -36px); }
+}
+
+@keyframes loading-dot {
+  0%, 100% { transform: translateY(0); opacity: .45; }
+  40% { transform: translateY(-9px); opacity: 1; }
+}
+
+/* Sans animation : l'ourson et ses notes restent posés. */
+@media (prefers-reduced-motion: reduce) {
+  .loading, .loading-bear, .loading-shadow, .loading-note, .loading-dots span { animation: none; }
+  .loading-note, .loading-dots span { opacity: 1; }
+}
+
 /* ----- Erreurs et états vides ----- */
 @keyframes shake {
   0%, 100% { translate: 0; }

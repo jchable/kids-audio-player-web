@@ -1,7 +1,7 @@
 /* Service worker : application disponible hors-ligne, audio servi depuis les téléchargements. */
 importScripts('js/sw-lib.js');
 
-const SHELL_CACHE = 'lecteur-shell-v6';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
+const SHELL_CACHE = 'lecteur-shell-v7';  // ⚠ à incrémenter à chaque modification d'un fichier du shell
 const AUDIO_CACHE = 'lecteur-audio-v1';  // Ne jamais renommer : contient les téléchargements
 
 const {
@@ -15,7 +15,7 @@ const SHELL_ASSETS = [
   'js/views/download-button.js', 'js/views/now-playing.js', 'js/views/path.js',
   'js/views/player.js', 'js/views/shelf.js', 'js/views/states.js',
   'fonts/fredoka.woff2', 'img/couverture-neutre.svg',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
+  'icons/favicon.svg', 'icons/favicon-32.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
 ];
 
 async function cacheCovers(catalogue) {

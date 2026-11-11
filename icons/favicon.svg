@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -25 48 48" width="48" height="48">
+  <!-- Tête d'ourson de l'icône, traits épaissis pour rester lisible à 16 px. -->
+  <circle cx="-13" cy="-14" r="8.5" fill="#8A5630"/>
+  <circle cx="13" cy="-14" r="8.5" fill="#8A5630"/>
+  <circle cx="-13" cy="-14" r="4.2" fill="#E9C9A0"/>
+  <circle cx="13" cy="-14" r="4.2" fill="#E9C9A0"/>
+  <circle r="20.5" fill="#9C6137"/>
+  <ellipse cy="7" rx="10.5" ry="8.5" fill="#E9C9A0"/>
+  <circle cx="-7.5" cy="-4" r="3" fill="#2A1A10"/>
+  <circle cx="7.5" cy="-4" r="3" fill="#2A1A10"/>
+  <ellipse cy="3.5" rx="4" ry="2.8" fill="#2A1A10"/>
+  <path d="M-4.5 10q4.5 3.4 9 0" stroke="#2A1A10" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
