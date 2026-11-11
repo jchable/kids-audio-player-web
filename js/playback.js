@@ -41,3 +41,11 @@ export function restoreAtStartup(book, saved, isAvailable) {
 export function shouldRelease({ active, playing }, catalogue) {
   return Boolean(active) && !playing && !findBook(catalogue, active.bookId);
 }
+
+/* Une nouvelle version de l'appli n'est chargée que si rien n'est en cours : ni histoire, ni téléchargement.
+   Sur le lecteur, on attend que l'appli soit cachée : recharger renverrait l'enfant au chemin. */
+export function canReloadForUpdate({
+  playing, downloading, route, hidden,
+}) {
+  return !playing && !downloading && (route !== 'player' || hidden);
+}

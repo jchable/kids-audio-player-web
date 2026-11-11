@@ -7,7 +7,7 @@ import { installImageFallback } from './dom.js';
 import { createInputGuard } from './input-guard.js';
 import { createOffline } from './offline.js';
 import {
-  next as nextCommand, restoreAtStartup, shouldRelease, tapChapter,
+  canReloadForUpdate, next as nextCommand, restoreAtStartup, shouldRelease, tapChapter,
 } from './playback.js';
 import { guardPlayerRoute, parseRoute, routeHash } from './router.js';
 import { createStore } from './store.js';
@@ -23,6 +23,8 @@ import { renderEmptyLibrary, renderLoadFailure } from './views/states.js';
 const CATALOGUE_TIMEOUT_MS = 3000;
 const CATALOGUE_RETRY_MS = 10000;
 const SCREEN_CHANGE_HOLD_MS = 400;
+// Délai de calme avant de recharger : en fin de chapitre, « pause » précède le chapitre suivant.
+const UPDATE_IDLE_MS = 3000;
 
 const root = document.getElementById('app');
 const nowPlayingRoot = document.getElementById('now-playing');
@@ -34,6 +36,8 @@ let serverUp = true;
 let serviceWorkerReady = false; // sans worker actif, un « téléchargé » ne servirait à rien hors-ligne
 let lastActiveKey = null;
 let shownNowPlayingKey = null;
+let updateReady = false; // une nouvelle version attend un moment calme pour être chargée
+let updateTimer = null;
 const seenBooks = new Map(); // un livre en écoute reste connu même s'il disparaît du catalogue
 const progress = new Map();
 
@@ -165,6 +169,7 @@ async function startDownload(bookId) {
   progress.delete(bookId);
   setCatalogue(serverCatalogue);
   render(false);
+  reloadWhenIdle();
 }
 
 async function removeDownload(bookId) {
@@ -251,6 +256,7 @@ function render(scrollToCurrent = true) {
 }
 
 function onEngineChange() {
+  reloadWhenIdle();
   if (!catalogue) return;
   const state = engine.getState();
   const route = currentRoute();
@@ -285,14 +291,41 @@ addEventListener('resize', () => {
   if (currentRoute().name === 'path') render(false);
 });
 
-addEventListener('hashchange', () => render());
+/* Nouvelle version installée par le service worker : la page se recharge dès que rien n'est en cours. */
+function reloadWhenIdle() {
+  if (!updateReady) return;
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(() => {
+    const idle = canReloadForUpdate({
+      playing: engine.getState().playing,
+      downloading: progress.size > 0,
+      route: currentRoute().name,
+      hidden: document.visibilityState === 'hidden',
+    });
+    if (idle) location.reload();
+  }, UPDATE_IDLE_MS);
+}
+
+addEventListener('hashchange', () => { render(); reloadWhenIdle(); });
 addEventListener('online', refreshServer);
 addEventListener('offline', refreshServer);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') refreshServer();
+  if (document.visibilityState === 'visible') {
+    refreshServer();
+    // Une appli installée revenue au premier plan n'est pas rouverte : on cherche la mise à jour ici.
+    navigator.serviceWorker?.getRegistration().then((registration) => registration?.update()).catch(() => {});
+  }
+  reloadWhenIdle();
 });
 
 if ('serviceWorker' in navigator) {
+  // Sans worker au chargement, c'est la première installation : la page est déjà à jour.
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    updateReady = true;
+    reloadWhenIdle();
+  });
   navigator.serviceWorker.register('sw.js').catch(() => {});
   navigator.serviceWorker.ready.then(() => {
     serviceWorkerReady = true;

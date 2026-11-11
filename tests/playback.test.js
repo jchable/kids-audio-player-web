@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  tapChapter, previous, next, onEnded, restoreAtStartup, shouldRelease,
+  tapChapter, previous, next, onEnded, restoreAtStartup, shouldRelease, canReloadForUpdate,
 } from '../js/playback.js';
 import { parseRoute, routeHash, guardPlayerRoute } from '../js/router.js';
 
@@ -140,4 +140,16 @@ test('livre retiré mais en lecture : gardé, l\'écoute n\'est jamais coupée',
 
 test('aucun livre actif : rien à libérer', () => {
   assert.equal(shouldRelease({ active: null, playing: false }, withoutBook), false);
+});
+
+test('nouvelle version : rechargée seulement quand rien n\'est en cours', () => {
+  const idle = { playing: false, downloading: false, route: 'shelf', hidden: false };
+  assert.equal(canReloadForUpdate(idle), true);
+  assert.equal(canReloadForUpdate({ ...idle, route: 'path' }), true);
+  assert.equal(canReloadForUpdate({ ...idle, playing: true }), false);
+  assert.equal(canReloadForUpdate({ ...idle, playing: true, hidden: true }), false);
+  assert.equal(canReloadForUpdate({ ...idle, downloading: true }), false);
+  // Le lecteur en pause : recharger renverrait l'enfant au chemin, sauf si l'appli est cachée.
+  assert.equal(canReloadForUpdate({ ...idle, route: 'player' }), false);
+  assert.equal(canReloadForUpdate({ ...idle, route: 'player', hidden: true }), true);
 });
